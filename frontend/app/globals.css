@@ -1,0 +1,281 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Light theme (default) */
+body {
+  @apply bg-white text-zinc-900;
+  font-family: var(--font-inter);
+  font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Dark theme */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  @apply bg-zinc-950 text-zinc-100;
+}
+
+/* Light theme */
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  @apply bg-white text-zinc-900;
+}
+
+/* Light theme overrides */
+html.light .bg-zinc-950 {
+  @apply bg-white;
+}
+
+html.light .bg-zinc-900 {
+  @apply bg-white;
+}
+
+html.light .bg-zinc-900\/50 {
+  @apply bg-gray-50;
+}
+
+html.light .bg-zinc-800 {
+  @apply bg-gray-100;
+}
+
+html.light .bg-zinc-800\/50 {
+  @apply bg-gray-50;
+}
+
+html.light .border-zinc-800 {
+  @apply border-gray-200;
+}
+
+html.light .border-zinc-700 {
+  @apply border-gray-300;
+}
+
+html.light .text-zinc-100 {
+  @apply text-zinc-900;
+}
+
+html.light .text-gray-200 {
+  @apply text-zinc-600;
+}
+
+html.light .text-gray-300 {
+  @apply text-zinc-700;
+}
+
+html.light .text-gray-400 {
+  @apply text-zinc-600;
+}
+
+html.light .text-gray-500 {
+  @apply text-zinc-500;
+}
+
+html.light .hover\:bg-zinc-800:hover {
+  @apply bg-gray-100;
+}
+
+html.light .hover\:bg-zinc-800\/50:hover {
+  @apply bg-gray-100;
+}
+
+html.light .hover\:bg-zinc-900\/30:hover {
+  @apply bg-gray-100;
+}
+
+html.light .hover\:border-zinc-700:hover {
+  @apply border-gray-300;
+}
+
+html.light .hover\:border-zinc-600:hover {
+  @apply border-gray-400;
+}
+
+html.light .hover\:text-white:hover {
+  @apply text-zinc-900;
+}
+
+html.light .hover\:text-gray-200:hover {
+  @apply text-zinc-900;
+}
+
+html.light .from-zinc-950 {
+  @apply from-white;
+}
+
+html.light .via-zinc-900 {
+  @apply via-white;
+}
+
+html.light .to-zinc-950 {
+  @apply to-white;
+}
+
+/* Additional light theme text overrides */
+html.light .text-white {
+  @apply text-zinc-900;
+}
+
+html.light .placeholder-gray-500::placeholder {
+  @apply placeholder-zinc-400;
+}
+
+/* Light theme button/card backgrounds */
+html.light .bg-blue-600\/10 {
+  @apply bg-blue-100;
+}
+
+html.light .hover\:bg-blue-50:hover {
+  @apply bg-blue-50;
+}
+
+/* Icon colors for light theme */
+html.light .text-blue-400 {
+  @apply text-blue-600;
+}
+
+html.light .text-blue-500 {
+  @apply text-blue-600;
+}
+
+html.light .text-green-400 {
+  @apply text-green-600;
+}
+
+html.light .text-amber-500 {
+  @apply text-amber-600;
+}
+
+html.light .text-yellow-400 {
+  @apply text-yellow-500;
+}
+
+html.light .text-indigo-400 {
+  @apply text-indigo-600;
+}
+
+html.light .group-hover\:text-blue-400:group-hover {
+  @apply text-blue-600;
+}
+
+html.light .group-hover\:text-blue-500:group-hover {
+  @apply text-blue-600;
+}
+
+/* Improved typography for better readability */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p {
+  line-height: 1.6;
+}
+
+.card {
+  @apply border border-zinc-800 rounded-2xl p-4;
+}
+
+.btn {
+  @apply px-3 py-2 rounded-2xl bg-zinc-900 border border-zinc-700 hover:bg-zinc-800;
+}
+
+/* AI thinking animation */
+@keyframes ai-thinking {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-ai-thinking {
+  animation: ai-thinking 2s linear infinite;
+}
+
+/* Visible scrollbar styling */
+.scrollbar-visible {
+  scrollbar-width: thin;
+  scrollbar-color: #a1a1aa #f4f4f5;
+}
+
+.scrollbar-visible::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-track {
+  background: #f4f4f5;
+  border-radius: 4px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: #a1a1aa;
+  border-radius: 4px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-thumb:hover {
+  background: #71717a;
+}
+
+/* Thin scrollbar for node content - more subtle */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ReactFlow light theme overrides */
+html.light .react-flow__background {
+  @apply bg-white;
+}
+
+html.light .react-flow__minimap {
+  @apply bg-zinc-100 border-zinc-200;
+}
+
+html.light .react-flow__controls {
+  @apply bg-white border-zinc-200;
+}
+
+html.light .react-flow__controls button {
+  @apply bg-white border-zinc-200 text-zinc-700;
+}
+
+html.light .react-flow__controls button:hover {
+  @apply bg-zinc-50;
+}
+
+html.light .react-flow__edge-path {
+  @apply stroke-zinc-400;
+}
