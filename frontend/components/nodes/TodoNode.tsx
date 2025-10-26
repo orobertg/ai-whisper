@@ -117,8 +117,8 @@ function TodoNode({ id, data, selected }: NodeProps<TodoNodeData>) {
       <Handle 
         type="target" 
         position={Position.Left} 
-        className="w-4 h-4 !bg-orange-300 !border-2 !border-orange-700 hover:!bg-orange-200 hover:scale-125 transition-transform"
-        style={{ left: -8 }}
+        className="w-6 h-6 !bg-orange-300 !border-2 !border-orange-700 hover:!bg-orange-200 hover:scale-110 transition-transform cursor-pointer"
+        style={{ left: -12 }}
       />
       
       {/* Fixed header area */}
@@ -209,8 +209,8 @@ function TodoNode({ id, data, selected }: NodeProps<TodoNodeData>) {
       <Handle 
         type="source" 
         position={Position.Right} 
-        className="w-4 h-4 !bg-orange-300 !border-2 !border-orange-700 hover:!bg-orange-200 hover:scale-125 transition-transform"
-        style={{ right: -8 }}
+        className="w-6 h-6 !bg-orange-300 !border-2 !border-orange-700 hover:!bg-orange-200 hover:scale-110 transition-transform cursor-pointer"
+        style={{ right: -12 }}
       />
     </div>
   );

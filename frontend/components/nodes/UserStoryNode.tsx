@@ -100,8 +100,8 @@ function UserStoryNode({ id, data, selected }: NodeProps<UserStoryNodeData>) {
       <Handle 
         type="target" 
         position={Position.Left} 
-        className="w-4 h-4 !bg-yellow-300 !border-2 !border-yellow-700 hover:!bg-yellow-200 hover:scale-125 transition-transform"
-        style={{ left: -8 }}
+        className="w-6 h-6 !bg-yellow-300 !border-2 !border-yellow-700 hover:!bg-yellow-200 hover:scale-110 transition-transform cursor-pointer"
+        style={{ left: -12 }}
       />
       
       {/* Fixed header area */}
@@ -159,8 +159,8 @@ function UserStoryNode({ id, data, selected }: NodeProps<UserStoryNodeData>) {
       <Handle 
         type="source" 
         position={Position.Right} 
-        className="w-4 h-4 !bg-yellow-300 !border-2 !border-yellow-700 hover:!bg-yellow-200 hover:scale-125 transition-transform"
-        style={{ right: -8 }}
+        className="w-6 h-6 !bg-yellow-300 !border-2 !border-yellow-700 hover:!bg-yellow-200 hover:scale-110 transition-transform cursor-pointer"
+        style={{ right: -12 }}
       />
     </div>
   );

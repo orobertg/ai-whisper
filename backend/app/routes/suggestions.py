@@ -94,6 +94,13 @@ When suggesting connections (add_edge), follow a logical left-to-right informati
 
 Think of the flow as: WHY (userstory) → WHAT (feature) → HOW (technical) → STRUCTURE (datamodel) → ACTION (todo)
 
+**IMPORTANT - Always Suggest Connections:**
+- **When adding a new node, ALWAYS suggest connections to related existing nodes**
+- Look for nodes to the left that should connect TO the new node
+- Look for nodes to the right that the new node should connect TO
+- Multiple connections are encouraged - one node can connect to many
+- Example: Adding "JWT Service" → suggest connections FROM "Auth Feature" AND TO "User Model"
+
 Example logical connections:
 - "User Login Story" → "Authentication Feature" → "JWT Service" → "User Entity"
 - "Shopping Cart Story" → "Cart Feature" → "Cart API" → "Cart Data Model"
