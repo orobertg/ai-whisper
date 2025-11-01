@@ -100,8 +100,8 @@ function TechnicalNode({ id, data, selected }: NodeProps<TechnicalNodeData>) {
       <Handle 
         type="target" 
         position={Position.Left} 
-        className="w-6 h-6 !bg-green-300 !border-2 !border-green-700 hover:!bg-green-200 hover:scale-110 transition-transform cursor-pointer"
-        style={{ left: -12 }}
+        className="w-8 h-8 !bg-green-300 !border-3 !border-green-700 hover:!bg-green-200 hover:scale-105 transition-transform cursor-pointer"
+        style={{ left: -16 }}
       />
       
       {/* Fixed header area */}
@@ -159,8 +159,8 @@ function TechnicalNode({ id, data, selected }: NodeProps<TechnicalNodeData>) {
       <Handle 
         type="source" 
         position={Position.Right} 
-        className="w-6 h-6 !bg-green-300 !border-2 !border-green-700 hover:!bg-green-200 hover:scale-110 transition-transform cursor-pointer"
-        style={{ right: -12 }}
+        className="w-8 h-8 !bg-green-300 !border-3 !border-green-700 hover:!bg-green-200 hover:scale-105 transition-transform cursor-pointer"
+        style={{ right: -16 }}
       />
     </div>
   );

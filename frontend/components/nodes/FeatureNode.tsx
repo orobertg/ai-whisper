@@ -114,8 +114,8 @@ function FeatureNode({ id, data, selected }: NodeProps<FeatureNodeData>) {
       <Handle 
         type="target" 
         position={Position.Left} 
-        className="w-6 h-6 !bg-blue-300 !border-2 !border-blue-700 hover:!bg-blue-200 hover:scale-110 transition-transform cursor-pointer"
-        style={{ left: -12 }}
+        className="w-8 h-8 !bg-blue-300 !border-3 !border-blue-700 hover:!bg-blue-200 hover:scale-105 transition-transform cursor-pointer"
+        style={{ left: -16 }}
       />
       
       {/* Fixed header area */}
@@ -185,8 +185,8 @@ function FeatureNode({ id, data, selected }: NodeProps<FeatureNodeData>) {
       <Handle 
         type="source" 
         position={Position.Right} 
-        className="w-6 h-6 !bg-blue-300 !border-2 !border-blue-700 hover:!bg-blue-200 hover:scale-110 transition-transform cursor-pointer"
-        style={{ right: -12 }}
+        className="w-8 h-8 !bg-blue-300 !border-3 !border-blue-700 hover:!bg-blue-200 hover:scale-105 transition-transform cursor-pointer"
+        style={{ right: -16 }}
       />
     </div>
   );

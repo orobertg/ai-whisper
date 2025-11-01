@@ -100,8 +100,8 @@ function DataModelNode({ id, data, selected }: NodeProps<DataModelNodeData>) {
       <Handle 
         type="target" 
         position={Position.Left} 
-        className="w-6 h-6 !bg-purple-300 !border-2 !border-purple-700 hover:!bg-purple-200 hover:scale-110 transition-transform cursor-pointer"
-        style={{ left: -12 }}
+        className="w-8 h-8 !bg-purple-300 !border-3 !border-purple-700 hover:!bg-purple-200 hover:scale-105 transition-transform cursor-pointer"
+        style={{ left: -16 }}
       />
       
       {/* Fixed header area */}
@@ -168,8 +168,8 @@ function DataModelNode({ id, data, selected }: NodeProps<DataModelNodeData>) {
       <Handle 
         type="source" 
         position={Position.Right} 
-        className="w-6 h-6 !bg-purple-300 !border-2 !border-purple-700 hover:!bg-purple-200 hover:scale-110 transition-transform cursor-pointer"
-        style={{ right: -12 }}
+        className="w-8 h-8 !bg-purple-300 !border-3 !border-purple-700 hover:!bg-purple-200 hover:scale-105 transition-transform cursor-pointer"
+        style={{ right: -16 }}
       />
     </div>
   );

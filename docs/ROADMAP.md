@@ -42,9 +42,9 @@ This document outlines strategic questions, technical improvements, and a phased
     ANSWER: Yes, the user can determine which elements to include.
 - **What happens after blueprint generation?** Can users:
   - Export to GitHub issues/PRs?
-    ANSWER: No, not initially. Keep it simple. Export to markdown specification documents.
+    ANSWER: No, not initially. Keep it simple. Export to markdown specification documents first. Then, we can export to Github later.
   - Iterate on blueprints with AI chat?
-    ANSWER: Yes.
+    ANSWER: Yes. Prefer to guide the user with an active AI which introduces itself and makes the process of learning how  to use the app easier, but also leads the effort in getting the right questions answered for a fully built-out set of specifications. However, the AI should offer to simplify the approach and make sure the basics are covered.
   - Share with others?
     ANSWER: No, exports specification documents perhaps to a github repo but definitely to a local folder.
 
