@@ -1,5 +1,18 @@
 # AI Whisper Roadmap
 
+## 📊 Current Status (November 2025)
+
+**Version:** v0.3.0  
+**Phase:** 2 (AI Workflow Enhancement) - In Progress  
+**Completion:** Phase 0 ✅ | Phase 1 ✅ | Phase 2 🚧 (50%) | Phase 3 ⏳ | Phase 4 ⏳
+
+### Recent Milestones
+- ✅ **Phase 0 Complete** - Mind mapping foundation with ReactFlow
+- ✅ **Phase 1 Complete** - Full MVP with persistence, folders, chat history
+- 🚧 **Phase 2 In Progress** - Enhanced AI capabilities and export system
+
+---
+
 ## Overview
 AI Whisper is a **mind mapping tool for solo developers** that transforms visual project planning into AI-generated specification documents. 
 
@@ -69,51 +82,70 @@ This document outlines strategic questions, technical improvements, and a phased
 
 ## Development Roadmap
 
-### Phase 0: Foundation - Mind Mapping UI (CRITICAL)
+### ✅ Phase 0: Foundation - Mind Mapping UI (COMPLETED)
 **Goal:** Transform blank canvas into structured mind mapping tool with templates
 
-**Current Problem:** The app has a blank tldraw canvas, but needs to be a **structured mind mapping tool** with node-based workflow and templates.
+**Status:** ✅ **COMPLETE** - October 2025
 
-**Required Changes:**
-1. **Node-based UI** - Replace free-form drawing with structured nodes/connections
-   - Node types: Specification documents, features, user stories, technical requirements
-   - Connection types: Dependencies, relationships, hierarchy
-   - Visual indicators for completion status, priority, etc.
+**Completed Features:**
+1. ✅ **Node-based UI** - Replaced free-form drawing with structured nodes/connections
+   - ✅ 6 Node types: Feature, Technical, User Story, Data Model, Notes, Todo
+   - ✅ Connection types: Dependencies, relationships, hierarchy
+   - ✅ Visual indicators for completion status, priority, etc.
 
-2. **Template System** - Pre-built templates for different project types
-   - **SaaS Application** template (auth, dashboard, API, database, deployment)
-   - **API Service** template (endpoints, data models, authentication, docs)
-   - **Mobile App** template (screens, navigation, state, backend integration)
-   - **Full-Stack Web App** template (frontend components, backend services, database)
-   - **Microservices Architecture** template (services, communication, infrastructure)
-   - Custom template creation and saving
+2. ✅ **Template System** - Pre-built templates for different project types
+   - ✅ **SaaS Application** template (auth, dashboard, billing, settings, API, database)
+   - ✅ **API Service** template (endpoints, auth, validation, docs, models)
+   - ✅ **Mobile App** template (splash, onboarding, home, navigation, state)
+   - ✅ **Spec-Driven Development** template (constitution, research, specs, implementation)
+   - ✅ **Blank Canvas** option
 
-3. **Template Selection Screen** - Similar to shown in images
-   - Card-based template selector on project creation
-   - Template preview/description
-   - "Start from scratch" option
+3. ✅ **Template Selection Screen**
+   - ✅ Card-based template selector on project creation
+   - ✅ Template preview/description with node counts
+   - ✅ "Start from scratch" option
+   - ✅ Folder selection during template creation
 
-4. **Guided Workflow** - AI assistant guides through filling out nodes
-   - Ask clarifying questions per node type
-   - Suggest missing components
-   - Validate completeness
+4. ✅ **AI-Guided Workflow** - AI assistant guides through filling out nodes
+   - ✅ Ask clarifying questions about project
+   - ✅ Suggest missing components automatically
+   - ✅ Validate completeness with progress metrics
+   - ✅ Approval workflow for AI suggestions
 
-### Phase 1: Complete the MVP Loop (2-3 weeks)
+### ✅ Phase 1: Complete the MVP Loop (COMPLETED)
 **Goal:** Create a fully functional single-user experience with persistence
 
-1. **Canvas/Mind Map persistence** - Save/load node-based canvas state to SQLite
-2. **Node CRUD operations** - Create, read, update, delete nodes and connections
-3. **List views** - Show past projects/mind maps with search/filter
-4. **Canvas → AI integration** - Extract nodes/structure and pass to AI for spec generation
-5. **Edit/delete** - CRUD operations for notes and blueprints
+**Status:** ✅ **COMPLETE** - November 2025
 
-### Phase 2: Enhance AI Workflow (2-3 weeks)
+**Completed Features:**
+1. ✅ **Canvas/Mind Map persistence** - Auto-save mind map state to SQLite
+2. ✅ **Node CRUD operations** - Create, read, update, delete nodes and connections
+3. ✅ **List views** - Show past projects with search/filter
+4. ✅ **Canvas → AI integration** - Extract nodes/structure and pass to AI
+5. ✅ **Chat history persistence** - Save/load conversation history per project
+6. ✅ **Folder organization** - Create and organize projects in folders
+7. ✅ **Project management** - Full CRUD for mind maps and projects
+8. ✅ **Home screen** - Modern UI with recent projects and quick actions
+9. ✅ **Settings system** - Theme, AI provider, and customization options
+
+### 🚧 Phase 2: Enhance AI Workflow (IN PROGRESS)
 **Goal:** Make AI generation more powerful and customizable
 
-5. **Multi-turn chat** - Let users refine blueprints through conversation
-6. **Template system** - Predefined blueprint formats (API spec, feature doc, architecture, etc.)
-7. **Context selection UI** - Checkboxes to choose which notes/canvas to include
-8. **Export options** - Copy as markdown, save as file, export to GitHub
+**Status:** 🚧 **IN PROGRESS** - Partially Complete
+
+**Completed:**
+1. ✅ **Multi-turn chat** - Users can refine through back-and-forth conversation
+2. ✅ **AI suggestion system** - AI analyzes context and suggests improvements
+3. ✅ **Streaming responses** - Real-time character-by-character AI responses
+4. ✅ **Context extraction** - AI reads full mind map context automatically
+
+**Pending:**
+5. ⏳ **Template system for exports** - Predefined blueprint formats (API spec, feature doc, etc.)
+6. ⏳ **Context selection UI** - Checkboxes to choose which notes/nodes to include
+7. ⏳ **Export options** - Export as markdown, YAML, PDF, or to GitHub
+8. ⏳ **Blueprint generation** - Generate specification documents from mind maps
+9. ⏳ **Custom AI prompts** - Allow users to customize AI behavior
+10. ⏳ **Multi-model support** - Switch between GPT-4, Claude, Gemini, etc.
 
 ### Phase 3: Collaboration & Sharing (3-4 weeks)
 **Goal:** Enable team workflows and sharing

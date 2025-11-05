@@ -1,6 +1,114 @@
 # AI Whisper Changelog
 
-## Phase 0: Mind Mapping Foundation (October 2025)
+All notable changes to AI Whisper will be documented in this file.
+
+---
+
+## [v0.3.0] - November 2025 - Home Screen & Chat Focus
+
+### 🎉 Major Features
+
+#### Modern Home Screen
+- **Time-based greetings** - Good morning/afternoon/evening based on system time
+- **Quick action cards** - Create project, Open project, Quick Chat buttons
+- **Folder organization** - Work, Personal, Archive folders for project management
+- **Recent conversations** - Shows last 3-5 projects with timestamps
+- **Model status indicator** - Shows current AI provider (Ollama/OpenAI) with connection status
+- **Weather widget placeholder** - UI for future weather integration
+- **Sidebar navigation** - Folder filtering and project browsing
+
+#### Chat Focus Mode
+- **Fullscreen chat interface** - Expand AI chat to full screen with ⛶ button
+- **Distraction-free experience** - Hide mind map and other panels
+- **Expanded message input** - Larger text area (3 rows) in focus mode
+- **Quick navigation** - Buttons to switch between mind map and settings
+- **Keyboard-friendly** - ESC to exit focus mode
+
+#### Settings Modal
+- **Appearance customization** - Light/Dark/System theme with visual previews
+- **Theme persistence** - Settings saved to localStorage
+- **Custom background toggle** - Enable/disable custom backgrounds
+- **Chat color toggle** - Customize chat bubble colors
+- **Clean modal design** - Modern card-based settings interface
+
+#### UI/UX Improvements
+- **Sidebar toggle** - ⋮⋮ button to hide/show right sidebar
+- **Mind map expansion** - Canvas expands to full width when sidebar hidden
+- **Smooth animations** - Page transitions and state changes
+- **Responsive design** - Works on desktop, tablet, and mobile
+- **Icon consistency** - Using Hugeicons throughout
+
+### 🐛 Bug Fixes
+- Fixed chat history not loading on project resume
+- Fixed settings not persisting across page reloads
+- Fixed sidebar panels overlapping on small screens
+- Fixed focus mode not properly hiding elements
+- Improved auto-scroll behavior in chat
+
+### 🎨 UI/UX Polish
+- Monochromatic color scheme for cleaner look
+- Better contrast in dark mode
+- Improved button hover states
+- More consistent spacing and padding
+- Better loading states and transitions
+
+---
+
+## [v0.2.0] - October 2025 - AI Chat & Suggestions
+
+### 🎉 Major Features
+
+#### AI Chat Integration
+- **Real-time chat** with AI assistant
+- **Streaming responses** with character-by-character animation
+- **Thinking indicator** with rotating logo animation
+- **Chat history persistence** - Saves to database per project
+- **Smart resumption** - Continues conversations from where you left off
+- **Context-aware** - AI knows about your entire mind map
+
+#### AI Suggestions System
+- **Automatic suggestions** - AI analyzes your project and suggests improvements
+- **Node creation suggestions** - AI recommends new nodes to add
+- **Connection suggestions** - AI identifies missing relationships
+- **Approval workflow** - Review all changes before applying
+- **Impact assessment** - Shows minor/moderate/major impact labels
+- **Applied changes feedback** - Confirmation messages showing what was changed
+
+#### Enhanced AI Capabilities
+- **Multi-turn conversations** - Natural back-and-forth dialogue
+- **Project context extraction** - AI reads all nodes, edges, and progress
+- **Template awareness** - AI knows which template you're using
+- **Progress tracking** - AI identifies missing requirements
+- **Smart suggestions** - Proactive recommendations based on best practices
+
+#### Folder System
+- **Project organization** - Create folders (Work, Personal, Archive, etc.)
+- **Folder filtering** - View projects by folder
+- **Folder metadata** - Custom icons and colors per folder
+- **Folder API** - Full CRUD endpoints for folder management
+- **Database model** - Added `Folder` table with relationships
+
+#### Todo Node Type
+- **Checklist support** - Create todo lists directly in mind map
+- **Checkbox interaction** - Click to toggle completion status
+- **Progress tracking** - Visual progress bar showing completion
+- **AI integration** - AI can suggest todo items with pre-filled tasks
+- **Persistent state** - Todo completion saved to database
+
+### 🔧 Technical Improvements
+- Added `/suggestions/analyze` endpoint for smart AI analysis
+- Implemented suggestion approval/rejection system
+- Created structured suggestion types (add_node, update_node, add_edge, rename_project)
+- Added impact calculation for changes
+- Improved AI prompt engineering for better suggestions
+- Added `chat_history` field to MindMap model
+- Created folder management API (`/folders/`)
+- Enhanced node positioning logic for better auto-layout
+- Added database migration support
+
+---
+
+## [v0.1.0] - October 2025 - Mind Mapping Foundation (Phase 0)
 
 ### 🚀 Major Features Added
 

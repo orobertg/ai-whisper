@@ -25,11 +25,23 @@ Before testing the new features, you **MUST** clear your browser cache:
 
 ### 1. 🏠 Home Screen
 - **URL**: http://localhost:3000
-- **What you'll see**: Welcome screen with quick action buttons
-- **Actions**: 
-  - "Create Project" → Opens template selector
-  - "Open Project" → Shows project list
-  - "Browse Templates" → Template gallery
+- **What you'll see**: Modern home dashboard with:
+  - Time-based greeting (Good morning/afternoon/evening)
+  - Quick chat input box
+  - Folder sidebar (Work, Personal, Archive)
+  - Recent conversations list
+  - Model status indicator
+  - Weather widget (UI placeholder)
+
+**Quick Actions**: 
+  - **"Create Project"** → Opens template selector with folder picker
+  - **"Open Project"** → Shows all your projects with timestamps
+  - **"Quick Chat"** → Start chatting without selecting a template
+  
+**Folder Organization**:
+  - Click folders in left sidebar to filter projects
+  - "All Projects" shows everything
+  - Each project shows template type and last updated time
 
 ### 2. ⚙️ Settings Modal
 **Location**: Top-right corner of editor view (gear icon ⚙️)
@@ -38,15 +50,17 @@ Before testing the new features, you **MUST** clear your browser cache:
 1. Create or open a project
 2. Click the **⚙️ icon** in the header
 3. Configure:
-   - AI Provider (Ollama/OpenAI)
-   - Ollama Model selection
-   - Auto-save settings
-   - Theme preferences
+   - **Interface Theme** - Light / Dark / System preference
+   - **Background** - Toggle custom backgrounds
+   - **Chat Color** - Toggle chat bubble colors
 
-**Current Settings**:
-- AI Provider: **Ollama** (local)
-- Model: **llama3.2:latest**
-- Auto-save: **Enabled** (2 seconds)
+**Settings Available**:
+- **System preference** - Follows your OS dark/light mode
+- **Light mode** - Light backgrounds, dark text
+- **Dark mode** - Dark backgrounds, light text
+- **Custom background** - Enable/disable decorative backgrounds
+- **Chat color** - Colorful vs monochromatic chat bubbles
+- Settings persist across page reloads (saved to localStorage)
 
 ### 3. 🔍 Chat Focus Mode
 **Location**: AI Assistant panel → **⛶ icon** in panel header
