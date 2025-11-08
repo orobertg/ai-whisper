@@ -27,7 +27,7 @@ type HomeContentProps = {
   onSelectTemplate?: (template: Template, folderId?: number | null) => void;
   onSelectProject?: (projectId: number, mode?: 'chat' | 'mindmap') => void;
   onStartChat?: (initialMessage: string) => void;
-  onOpenSettings?: () => void;
+  onOpenSettings?: (provider?: string) => void;
   userName?: string;
   selectedFolderId: number | null;
   folders: Array<{ id: number; name: string; icon: string; color: string }>;
@@ -69,13 +69,12 @@ export default function HomeContent({
     "DeepSeek - Coder V2"
   ];
   
-  // Handle unconfigured model selection - redirect to settings
+  // Handle unconfigured model selection - redirect to settings with provider
   const handleUnconfiguredModel = (modelName: string) => {
     const providerKey = getProviderFromModel(modelName);
     if (providerKey && onOpenSettings) {
-      // Store the provider to pre-select in settings
-      sessionStorage.setItem("openProviderSettings", providerKey);
-      onOpenSettings();
+      // Open settings directly to the provider's configuration page
+      onOpenSettings(providerKey);
     }
   };
 
@@ -241,7 +240,7 @@ export default function HomeContent({
       : "bg-zinc-800/90 backdrop-blur-md shadow-xl border-2 border-white/30 hover:border-white/50 hover:bg-zinc-700/90 text-white font-semibold"
     : isLight
       ? "border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900"
-      : "bg-zinc-800 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-700 text-zinc-300 hover:text-white";
+      : "bg-zinc-900 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-100 hover:text-white";
   
   const buttonActiveClass = hasWallpaper
     ? isLight
@@ -258,7 +257,7 @@ export default function HomeContent({
       : "bg-zinc-900/95 backdrop-blur-xl border-2 border-white/30 rounded-xl p-4 shadow-2xl"
     : isLight
       ? "bg-white border border-zinc-200 rounded-xl p-4 shadow-lg"
-      : "bg-zinc-800 border border-zinc-700 rounded-xl p-4";
+      : "bg-zinc-900/50 border border-zinc-800 rounded-xl p-4";
   
   const cardClass = hasWallpaper
     ? isLight
@@ -266,7 +265,7 @@ export default function HomeContent({
       : "bg-white/15 backdrop-blur-lg border-2 border-white/40 hover:border-white/70 hover:bg-white/25 rounded-lg transition-all group cursor-pointer shadow-2xl"
     : isLight
       ? "bg-white border border-zinc-200 hover:border-blue-500 hover:shadow-md rounded-lg transition-all group cursor-pointer"
-      : "bg-zinc-800 border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-750 rounded-lg transition-all group cursor-pointer";
+      : "bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/70 rounded-lg transition-all group cursor-pointer";
   
   const inputClass = hasWallpaper
     ? isLight
@@ -274,7 +273,7 @@ export default function HomeContent({
       : "bg-zinc-800/95 backdrop-blur-sm border border-zinc-700 rounded-3xl shadow-lg hover:shadow-xl transition-shadow text-white"
     : isLight
       ? "bg-white border border-zinc-300 rounded-3xl shadow-sm hover:shadow-md transition-shadow"
-      : "bg-zinc-800 border border-zinc-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow text-white";
+      : "bg-zinc-900 border border-zinc-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow text-white";
   
   const panelTextClass = hasWallpaper
     ? isLight ? "text-zinc-900" : "text-white font-semibold"
@@ -305,15 +304,15 @@ export default function HomeContent({
             />
           </div>
           <button
-            onClick={onOpenSettings}
+            onClick={() => onOpenSettings && onOpenSettings()}
             className={`p-2 rounded-lg transition-colors ${
               hasWallpaper
                 ? isLight
                   ? "bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900 shadow-lg"
-                  : "bg-zinc-900/90 backdrop-blur-md border border-white/30 hover:bg-zinc-800/90 text-gray-300 hover:text-white shadow-lg"
+                  : "bg-zinc-900/90 backdrop-blur-md border border-white/30 hover:bg-zinc-800/90 text-zinc-100 hover:text-white shadow-lg"
                 : isLight
                   ? "bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900"
-                  : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-gray-300 hover:text-white"
+                  : "bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-100 hover:text-white"
             }`}
             title="Settings"
           >
@@ -340,7 +339,7 @@ export default function HomeContent({
               {/* Active model display */}
               <div className={`flex items-center gap-2 px-4 pt-3 pb-2 ${isLight ? 'border-b border-zinc-200' : 'border-b border-zinc-700'}`}>
                 <CheckmarkCircle02Icon size={16} className="text-green-500" strokeWidth={2} />
-                <span className={`text-xs font-medium ${isLight ? 'text-zinc-600' : 'text-gray-400'}`}>
+                <span className={`text-xs font-medium ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
                   {selectedModel}
                 </span>
                 <div className="flex-1"></div>
@@ -438,10 +437,10 @@ export default function HomeContent({
                           key={folder.id}
                           className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 ${
                             hasWallpaper
-                              ? "bg-zinc-800/50 text-gray-300 border border-zinc-700 hover:border-zinc-600"
+                              ? "bg-zinc-800/50 text-zinc-100 border border-zinc-700 hover:border-zinc-600"
                               : isLight
                                 ? "bg-zinc-50 text-zinc-700 border border-zinc-200 hover:border-zinc-300"
-                                : "bg-zinc-800 text-zinc-300 border border-zinc-700 hover:border-zinc-600"
+                                : "bg-zinc-900 text-zinc-100 border border-zinc-700 hover:border-zinc-600"
                           }`}
                         >
                           {getFolderIcon(folder.name)}

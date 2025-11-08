@@ -24,10 +24,24 @@ Welcome to the AIWhisper documentation! This directory contains comprehensive gu
 
 ## 🎨 UI/UX Documentation
 
-### Theme System
+### Theme System ⭐ UPDATED
+- **[Theme System](./THEME_SYSTEM.md)** ⭐ COMPLETE GUIDE - **START HERE**
+  - Comprehensive theme documentation
+  - Component patterns and best practices
+  - Design tokens (colors, typography, spacing)
+  - Usage examples and templates
+  - Component checklist
+  - Common issues and solutions
+- **[Theme Quick Reference](./THEME_QUICK_REFERENCE.md)** ⭐ CHEAT SHEET - Quick lookup
+  - Hook usage and imports
+  - Common patterns (cards, buttons, text, inputs, badges)
+  - Color reference tables
+  - Testing checklist
+  - Anti-patterns to avoid
+  - Component template
 - **[UI Design System](./UI_DESIGN_SYSTEM.md)** - Design principles and patterns
 - **[Components](./COMPONENTS.md)** - Component library documentation
-- **[Theme System Architecture](./THEME_SYSTEM_ARCHITECTURE.md)** ⭐ NEW - Centralized theming
+- **[Theme System Architecture](./THEME_SYSTEM_ARCHITECTURE.md)** - Centralized theming
   - React Context implementation
   - Helper functions for styling
   - Color palette and accessibility
@@ -114,6 +128,13 @@ For **Frontend Development**:
 
 ### Backend
 - **[API Reference](./API_REFERENCE.md)** - Complete API documentation *(coming soon)*
+- **[Database Migrations](./DATABASE_MIGRATIONS.md)** ⭐ NEW - Schema change management
+  - Automatic migration system
+  - How migrations work
+  - Adding new migrations
+  - Troubleshooting guide
+  - Current schema reference
+  - Manual migration steps
 - **[Database Schema](./DATABASE_SCHEMA.md)** - Current database structure *(coming soon)*
 - **[AI Providers](./AI_PROVIDERS.md)** - AI integration details *(coming soon)*
 
@@ -129,9 +150,10 @@ For **Frontend Development**:
 ### Active Projects
 - ✅ **Custom Wallpapers** - Completed
 - ✅ **Model Selector UX** - Completed
-- 🚧 **Kanban Board** - In Planning (4 documents)
-- 🚧 **Enhanced Recent Chats** - In Planning
-- 🚧 **Centralized Theme System** - In Planning
+- ✅ **Centralized Theme System** - Completed (Phase 1)
+- ✅ **Enhanced Recent Chats** - Completed (Backend + Frontend)
+- ✅ **Synapse-Inspired Dark Theme** - Completed
+- 🚧 **Kanban Board** - In Progress (Phase 2)
 
 ### Completed Projects
 - Custom wallpaper system with blur effects
@@ -146,6 +168,11 @@ For **Frontend Development**:
 ### Current Version: 0.2.0
 
 #### Recent Updates (Latest First)
+- **2025-11-08**: ✅ Mind-map canvas dark theme fix (ReactFlow background)
+- **2025-11-08**: ✅ Database migration system implemented
+- **2025-11-08**: ✅ Synapse-inspired dark theme completed
+- **2025-11-08**: ✅ Enhanced recent chats (preview, model, message count)
+- **2025-11-08**: ✅ Comprehensive theme documentation created
 - **2025-01-08**: Kanban board planning documents created
 - **2025-01-08**: Model selector UX improvements
 - **2025-01-08**: Theme system architecture designed

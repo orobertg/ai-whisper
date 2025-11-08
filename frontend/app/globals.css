@@ -279,3 +279,28 @@ html.light .react-flow__controls button:hover {
 html.light .react-flow__edge-path {
   @apply stroke-zinc-400;
 }
+
+/* ReactFlow dark theme overrides */
+html.dark .react-flow__background {
+  @apply bg-zinc-900;
+}
+
+html.dark .react-flow__minimap {
+  @apply bg-zinc-800 border-zinc-700;
+}
+
+html.dark .react-flow__controls {
+  @apply bg-zinc-900 border-zinc-700;
+}
+
+html.dark .react-flow__controls button {
+  @apply bg-zinc-900 border-zinc-700 text-zinc-100;
+}
+
+html.dark .react-flow__controls button:hover {
+  @apply bg-zinc-800;
+}
+
+html.dark .react-flow__edge-path {
+  @apply stroke-zinc-600;
+}

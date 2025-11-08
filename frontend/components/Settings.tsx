@@ -20,10 +20,12 @@ type Wallpaper = {
 type SettingsProps = {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: SettingsTab;
+  initialProvider?: string;
 };
 
-export default function Settings({ isOpen, onClose }: SettingsProps) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("appearance");
+export default function Settings({ isOpen, onClose, initialTab, initialProvider }: SettingsProps) {
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab || "appearance");
   const [theme, setTheme] = useState<Theme>("system");
   const [customBackground, setCustomBackground] = useState(false);
   const [chatColor, setChatColor] = useState(false);
@@ -32,6 +34,18 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
   const [wallpaperBlur, setWallpaperBlur] = useState<number>(0);
   const [hasChanges, setHasChanges] = useState(false);
   const [providerHasChanges, setProviderHasChanges] = useState(false);
+
+  // Handle initial tab and provider selection
+  useEffect(() => {
+    if (isOpen) {
+      if (initialTab) {
+        setActiveTab(initialTab);
+      }
+      if (initialProvider) {
+        setActiveTab("providers");
+      }
+    }
+  }, [isOpen, initialTab, initialProvider]);
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -581,15 +595,16 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
           {activeTab === "providers" && (
             <ProviderSettings 
               onHasChanges={setProviderHasChanges}
+              initialProvider={initialProvider}
             />
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-zinc-200 flex justify-between items-center">
+        <div className="px-6 py-4 border-t border-zinc-200 flex justify-end items-center gap-3">
           <button
             onClick={handleClose}
-            className="px-5 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-colors"
+            className="px-5 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
           >
             Close
           </button>

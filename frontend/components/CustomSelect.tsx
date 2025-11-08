@@ -133,10 +133,10 @@ export default function CustomSelect({
         className={`w-full ${isCompact ? 'px-2 py-1 text-xs' : 'px-4 py-2.5 text-sm'} border ${isCompact ? 'rounded-md' : 'rounded-xl'} text-left flex items-center justify-between transition-all font-medium ${
           isDark
             ? disabled
-              ? "bg-zinc-800 border-zinc-700 text-zinc-600 cursor-not-allowed"
+              ? "bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed"
               : isOpen
-              ? "bg-zinc-700 border-zinc-600 text-gray-200"
-              : "bg-zinc-800 border-zinc-700 text-gray-300 hover:bg-zinc-700 hover:border-zinc-600"
+              ? "bg-zinc-900 border-zinc-600 text-zinc-100"
+              : "bg-zinc-900 border-zinc-700 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-600"
             : disabled
               ? "border-zinc-200 text-zinc-400 cursor-not-allowed bg-zinc-50"
               : isOpen
@@ -144,7 +144,7 @@ export default function CustomSelect({
               : "bg-white border-zinc-300 text-zinc-900 hover:border-zinc-400"
         }`}
       >
-        <span className={hasValue ? (isDark ? "text-gray-200 font-medium" : "text-zinc-900 font-medium") : (isDark ? "text-gray-500" : "text-zinc-500")}>
+        <span className={hasValue ? (isDark ? "text-zinc-100 font-medium" : "text-zinc-900 font-medium") : (isDark ? "text-zinc-500" : "text-zinc-500")}>
           {displayValue}
         </span>
         <ArrowDown01Icon
@@ -152,7 +152,7 @@ export default function CustomSelect({
           strokeWidth={2}
           className={`transition-transform duration-200 flex-shrink-0 ${
             isOpen ? "rotate-180" : ""
-          } ${disabled ? (isDark ? "text-zinc-600" : "text-zinc-400") : (isDark ? "text-gray-500" : "text-zinc-500")}`}
+          } ${disabled ? (isDark ? "text-zinc-600" : "text-zinc-400") : (isDark ? "text-zinc-400" : "text-zinc-500")}`}
         />
       </button>
 
@@ -161,7 +161,7 @@ export default function CustomSelect({
         <div
           ref={dropdownRef}
           className={`absolute z-[9999] w-full mt-1 border rounded-lg shadow-xl overflow-hidden ${
-            isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200'
+            isDark ? 'bg-zinc-900 border-zinc-700' : 'bg-white border-zinc-200'
           }`}
         >
           <div className="max-h-60 overflow-y-auto py-1">
@@ -183,10 +183,10 @@ export default function CustomSelect({
                     className={`w-full ${isCompact ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'} text-left flex items-center gap-2 transition-colors ${
                       isDark
                         ? isSelected
-                          ? "bg-zinc-700 text-white font-medium"
+                          ? "bg-zinc-800 text-white font-medium"
                           : isHighlighted
-                          ? "bg-zinc-750 text-gray-200"
-                          : "text-gray-300 hover:bg-zinc-750"
+                          ? "bg-zinc-800 text-zinc-100"
+                          : "text-zinc-300 hover:bg-zinc-800"
                         : isSelected
                           ? "bg-zinc-100 text-zinc-900 font-medium"
                           : isHighlighted

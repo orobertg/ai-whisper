@@ -36,5 +36,9 @@ class MindMap(SQLModel, table=True):
     nodes_json: str = Field(sa_column=Column(Text))  # JSON string of nodes
     edges_json: str = Field(sa_column=Column(Text))  # JSON string of edges
     chat_history: str = Field(sa_column=Column(Text), default="[]")  # JSON string of chat messages
+    # Enhanced recent chats metadata
+    last_message_preview: str = ""  # Preview of the last chat message (truncated)
+    ai_model: str = ""  # AI model used (e.g., "GPT-4", "Claude Sonnet")
+    message_count: int = 0  # Total number of messages in chat_history
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

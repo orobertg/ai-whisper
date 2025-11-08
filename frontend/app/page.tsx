@@ -6,12 +6,13 @@ import Sidebar from "@/components/Sidebar";
 import HomeContent from "@/components/HomeContent";
 import Settings from "@/components/Settings";
 import ExportModal from "@/components/ExportModal";
+import KanbanBoard from "@/components/kanban/KanbanBoard";
 import { Template, TEMPLATES } from "@/lib/templates";
 import { calculateProgress } from "@/lib/progress";
 import { Node, Edge } from "reactflow";
 import { AiNetworkIcon, Settings02Icon, Home01Icon, FloppyDiskIcon, Menu01Icon, Cancel01Icon, MessageMultiple01Icon, HierarchyIcon, SidebarRight01Icon, Download01Icon } from "@hugeicons/react";
 
-type ViewMode = "home" | "editor";
+type ViewMode = "home" | "editor" | "kanban";
 
 type MindMapData = {
   id?: number;
@@ -46,6 +47,8 @@ export default function Home() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<"appearance" | "providers" | undefined>(undefined);
+  const [settingsProvider, setSettingsProvider] = useState<string | undefined>(undefined);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [chatFocusMode, setChatFocusMode] = useState(false);
@@ -288,6 +291,39 @@ export default function Home() {
     setEdges([]);
     setCurrentChatHistory([]); // Clear chat history
     setHasUnsavedChanges(false);
+  };
+
+  const handleNavigateToKanban = () => {
+    if (hasUnsavedChanges) {
+      if (!confirm("You have unsaved changes. Do you want to leave?")) return;
+    }
+    setViewMode("kanban");
+    setChatFocusMode(false);
+    setCurrentMindMap(null);
+    setSelectedTemplate(null);
+    setNodes([]);
+    setEdges([]);
+    setCurrentChatHistory([]);
+    setHasUnsavedChanges(false);
+  };
+
+  // Handler to open settings with specific tab/provider
+  const handleOpenSettings = (provider?: string) => {
+    if (provider) {
+      setSettingsTab("providers");
+      setSettingsProvider(provider);
+    } else {
+      setSettingsTab(undefined);
+      setSettingsProvider(undefined);
+    }
+    setShowSettings(true);
+  };
+
+  // Handler to close settings and reset state
+  const handleCloseSettings = () => {
+    setShowSettings(false);
+    setSettingsTab(undefined);
+    setSettingsProvider(undefined);
   };
 
   const handleNodesChange = (newNodes: Node[]) => {
@@ -538,6 +574,7 @@ export default function Home() {
           onReloadChats={loadRecentChats}
           onToggleSidebar={() => setShowSidebar(!showSidebar)}
           onGoHome={handleBackToProjects}
+          onNavigateToKanban={handleNavigateToKanban}
           showChat={false}
           nodes={nodes}
           edges={edges}
@@ -599,7 +636,7 @@ export default function Home() {
               setCurrentMindMap(null);
               setCurrentChatHistory([]); // Clear chat history when going home
             }}
-            onOpenSettings={() => setShowSettings(true)}
+            onOpenSettings={() => handleOpenSettings()}
             onOpenExport={() => setShowExportModal(true)}
             initialMessage={initialChatMessage}
             savedChatHistory={currentChatHistory}
@@ -633,7 +670,12 @@ export default function Home() {
           />
         </div>
         
-        <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+        <Settings 
+          isOpen={showSettings} 
+          onClose={handleCloseSettings}
+          initialTab={settingsTab}
+          initialProvider={settingsProvider}
+        />
         <ExportModal
           isOpen={showExportModal}
           onClose={() => setShowExportModal(false)}
@@ -682,6 +724,7 @@ export default function Home() {
           onReloadChats={loadRecentChats}
           onToggleSidebar={() => setShowSidebar(!showSidebar)}
           onGoHome={handleBackToProjects}
+          onNavigateToKanban={handleNavigateToKanban}
           showChat={false}
           nodes={nodes}
           edges={edges}
@@ -731,7 +774,7 @@ export default function Home() {
           onSelectTemplate={handleHomeTemplateSelect}
           onSelectProject={handleHomeProjectSelect}
           onStartChat={handleStartChat}
-          onOpenSettings={() => setShowSettings(true)}
+          onOpenSettings={handleOpenSettings}
           selectedFolderId={selectedFolderId}
           folders={folders}
           recentChats={recentChats.slice(0, 3)}
@@ -739,6 +782,8 @@ export default function Home() {
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
         />
+      ) : viewMode === "kanban" ? (
+        <KanbanBoard projectId={selectedFolderId || undefined} />
       ) : (
         <main className="flex-1 flex flex-col">
           {/* Editor Header */}
@@ -794,7 +839,7 @@ export default function Home() {
               
               {/* Settings Icon */}
               <button
-                onClick={() => setShowSettings(true)}
+                onClick={() => handleOpenSettings()}
                 className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-zinc-800 transition-colors"
                 title="Settings"
               >
@@ -819,7 +864,12 @@ export default function Home() {
       )}
 
       {/* Settings Modal */}
-      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <Settings 
+        isOpen={showSettings} 
+        onClose={handleCloseSettings}
+        initialTab={settingsTab}
+        initialProvider={settingsProvider}
+      />
       
       {/* Export Modal */}
       <ExportModal

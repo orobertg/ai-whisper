@@ -38,9 +38,10 @@ type TestResult = {
 type ProviderSettingsProps = {
   onHasChanges?: (hasChanges: boolean) => void;
   onSave?: () => void;
+  initialProvider?: string;
 };
 
-export default function ProviderSettings({ onHasChanges, onSave }: ProviderSettingsProps) {
+export default function ProviderSettings({ onHasChanges, onSave, initialProvider }: ProviderSettingsProps) {
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>("ollama");
   const [model, setModel] = useState<string>("llama3.2:latest");
@@ -96,17 +97,22 @@ export default function ProviderSettings({ onHasChanges, onSave }: ProviderSetti
         // Keep using default providers
       });
 
-    // Check for pre-selected provider from model selector
-    const preselectedProvider = sessionStorage.getItem("openProviderSettings");
-    if (preselectedProvider) {
-      setSelectedProvider(preselectedProvider);
-      loadProviderConfig(preselectedProvider);
-      sessionStorage.removeItem("openProviderSettings");
+    // Check for pre-selected provider - prioritize prop over sessionStorage
+    if (initialProvider) {
+      setSelectedProvider(initialProvider);
+      loadProviderConfig(initialProvider);
     } else {
-      // Load saved configuration for the initial provider
-      loadProviderConfig("ollama");
+      const preselectedProvider = sessionStorage.getItem("openProviderSettings");
+      if (preselectedProvider) {
+        setSelectedProvider(preselectedProvider);
+        loadProviderConfig(preselectedProvider);
+        sessionStorage.removeItem("openProviderSettings");
+      } else {
+        // Load saved configuration for the initial provider
+        loadProviderConfig("ollama");
+      }
     }
-  }, []);
+  }, [initialProvider]);
 
   // Load configuration for a specific provider
   const loadProviderConfig = (providerName: string) => {

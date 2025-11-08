@@ -16,6 +16,7 @@ import ReactFlow, {
   ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { useTheme } from '@/contexts/ThemeContext';
 
 import FeatureNode from './nodes/FeatureNode';
 import TechnicalNode from './nodes/TechnicalNode';
@@ -52,6 +53,7 @@ export default function MindMap({
   onNodesChange,
   onEdgesChange,
 }: MindMapProps) {
+  const { isLight } = useTheme();
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   
@@ -146,31 +148,54 @@ export default function MindMap({
         defaultEdgeOptions={{
           type: 'custom',
           animated: false,
-          style: { stroke: '#64748b', strokeWidth: 2 }
+          style: { stroke: isLight ? '#64748b' : '#71717a', strokeWidth: 2 }
         }}
         deleteKeyCode="Delete"
       >
         <Controls />
         <MiniMap
           nodeColor={(node) => {
-            switch (node.type) {
-              case 'feature':
-                return '#52525b';
-              case 'technical':
-                return '#71717a';
-              case 'userstory':
-                return '#a1a1aa';
-              case 'datamodel':
-                return '#d4d4d8';
-              case 'notes':
-                return '#e4e4e7';
-              default:
-                return '#3f3f46';
+            if (isLight) {
+              switch (node.type) {
+                case 'feature':
+                  return '#52525b';
+                case 'technical':
+                  return '#71717a';
+                case 'userstory':
+                  return '#a1a1aa';
+                case 'datamodel':
+                  return '#d4d4d8';
+                case 'notes':
+                  return '#e4e4e7';
+                default:
+                  return '#3f3f46';
+              }
+            } else {
+              // Dark theme - lighter colors
+              switch (node.type) {
+                case 'feature':
+                  return '#a1a1aa';
+                case 'technical':
+                  return '#d4d4d8';
+                case 'userstory':
+                  return '#e4e4e7';
+                case 'datamodel':
+                  return '#f4f4f5';
+                case 'notes':
+                  return '#fafafa';
+                default:
+                  return '#71717a';
+              }
             }
           }}
-          className="bg-zinc-100"
+          className={isLight ? 'bg-zinc-100' : 'bg-zinc-800'}
         />
-        <Background variant={BackgroundVariant.Dots} gap={12} size={1} className="bg-white" />
+        <Background 
+          variant={BackgroundVariant.Dots} 
+          gap={12} 
+          size={1} 
+          className={isLight ? 'bg-white' : 'bg-zinc-900'} 
+        />
         <MindMapToolbar onAddNode={(node) => {
           // Manually added nodes are automatically tracked through handleNodesChange
         }} />

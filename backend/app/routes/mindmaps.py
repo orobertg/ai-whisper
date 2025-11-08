@@ -56,7 +56,27 @@ def update_mindmap(mindmap_id: int, payload: Dict, session: Session = Depends(ge
     if "folder_id" in payload:
         mindmap.folder_id = payload["folder_id"]
     if "chat_history" in payload:
-        mindmap.chat_history = json.dumps(payload["chat_history"])
+        chat_history = payload["chat_history"]
+        mindmap.chat_history = json.dumps(chat_history)
+        
+        # Update enhanced metadata for recent chats
+        if isinstance(chat_history, list) and len(chat_history) > 0:
+            # Update message count
+            mindmap.message_count = len(chat_history)
+            
+            # Get last message as preview (truncate to 100 chars)
+            last_message = chat_history[-1]
+            if isinstance(last_message, dict):
+                content = last_message.get("content", "")
+                if isinstance(content, str):
+                    mindmap.last_message_preview = content[:100] + ("..." if len(content) > 100 else "")
+        else:
+            mindmap.message_count = 0
+            mindmap.last_message_preview = ""
+    
+    # Allow explicit AI model updates
+    if "ai_model" in payload:
+        mindmap.ai_model = str(payload["ai_model"])
 
     mindmap.updated_at = datetime.utcnow()
     session.add(mindmap)

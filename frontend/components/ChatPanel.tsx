@@ -59,7 +59,7 @@ type ChatPanelProps = {
   onToggleFocus?: () => void;
   onToggleSidebar?: () => void;
   onGoHome?: () => void;
-  onOpenSettings?: () => void;
+  onOpenSettings?: (provider?: string) => void;
   onOpenExport?: () => void;  // Open export modal
   initialMessage?: string | null;
   savedChatHistory?: Message[];  // Pre-existing chat history to restore
@@ -107,13 +107,12 @@ export default function ChatPanel({
     "DeepSeek - Coder V2"
   ];
   
-  // Handle unconfigured model selection - redirect to settings
+  // Handle unconfigured model selection - redirect to settings with provider
   const handleUnconfiguredModel = (modelName: string) => {
     const providerKey = getProviderFromModel(modelName);
     if (providerKey && onOpenSettings) {
-      // Store the provider to pre-select in settings
-      sessionStorage.setItem("openProviderSettings", providerKey);
-      onOpenSettings();
+      // Open settings directly to the provider's configuration page
+      onOpenSettings(providerKey);
     }
   };
   
@@ -708,7 +707,7 @@ export default function ChatPanel({
             )}
             {onOpenSettings && (
               <button
-                onClick={onOpenSettings}
+                onClick={() => onOpenSettings()}
                 className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-zinc-800 transition-colors"
                 title="Settings"
               >

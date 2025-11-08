@@ -17,7 +17,8 @@ import {
   Add01Icon,
   Edit02Icon,
   Delete02Icon,
-  MoreVerticalIcon
+  MoreVerticalIcon,
+  TaskDaily02Icon
 } from "@hugeicons/react";
 import ChatPanel from "./ChatPanel";
 import { Node, Edge } from "reactflow";
@@ -39,6 +40,10 @@ type RecentChat = {
   folder_id?: number;
   nodes_json?: string;
   chat_history?: string;
+  // Enhanced metadata
+  last_message_preview?: string;
+  ai_model?: string;
+  message_count?: number;
 };
 
 type SidebarProps = {
@@ -51,6 +56,7 @@ type SidebarProps = {
   onReloadChats?: () => void;  // Callback to reload chats
   onToggleSidebar?: () => void;  // New: toggle sidebar visibility
   onGoHome?: () => void;  // Navigate to home screen
+  onNavigateToKanban?: () => void;  // Navigate to Kanban board
   // Chat panel props (only when in editor mode)
   showChat?: boolean;
   nodes?: Node[];
@@ -78,6 +84,7 @@ export default function Sidebar({
   onReloadChats,
   onToggleSidebar,  // New prop
   onGoHome,  // New prop
+  onNavigateToKanban,  // New prop
   showChat = false,
   nodes = [],
   edges = [],
@@ -283,6 +290,20 @@ export default function Sidebar({
               >
                 <Home01Icon size={14} strokeWidth={2} />
                 {!isCollapsed && <span>Home</span>}
+              </button>
+            )}
+            
+            {/* Kanban Board Button */}
+            {onNavigateToKanban && (
+              <button 
+                onClick={onNavigateToKanban}
+                className={`w-full text-left rounded text-xs flex items-center transition-colors text-gray-300 hover:bg-zinc-800 ${
+                  isCollapsed ? 'px-2 py-2 justify-center' : 'px-2 py-1.5 gap-2'
+                }`}
+                title={isCollapsed ? "Kanban Board" : undefined}
+              >
+                <TaskDaily02Icon size={14} strokeWidth={2} />
+                {!isCollapsed && <span>Kanban Board</span>}
               </button>
             )}
             
@@ -504,33 +525,82 @@ export default function Sidebar({
                   return shortened || 'Untitled chat';
                 };
                 
+                // Format timestamp as "X hours ago", "X days ago", etc.
+                const getTimeAgo = (dateString: string) => {
+                  const now = new Date();
+                  const date = new Date(dateString);
+                  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+                  
+                  if (seconds < 60) return 'just now';
+                  const minutes = Math.floor(seconds / 60);
+                  if (minutes < 60) return `${minutes}m ago`;
+                  const hours = Math.floor(minutes / 60);
+                  if (hours < 24) return `${hours}h ago`;
+                  const days = Math.floor(hours / 24);
+                  if (days < 7) return `${days}d ago`;
+                  const weeks = Math.floor(days / 7);
+                  if (weeks < 4) return `${weeks}w ago`;
+                  const months = Math.floor(days / 30);
+                  return `${months}mo ago`;
+                };
+                
                 return (
                   <button
                     key={chat.id}
                     onClick={() => onSelectProject(chat.id, 'chat')}
-                    className={`w-full px-3 py-2 rounded-md text-sm transition-all group flex items-center gap-2 ${
+                    className={`w-full px-3 py-2.5 rounded-lg text-sm transition-all group flex flex-col gap-1.5 ${
                       currentProjectId === chat.id
-                        ? "bg-zinc-100 text-zinc-900 font-medium"
+                        ? "bg-zinc-100 text-zinc-900"
                         : "text-gray-400 hover:text-gray-200 hover:bg-zinc-800/50"
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <BubbleChatIcon 
-                        size={16} 
-                        strokeWidth={2} 
-                        className={currentProjectId === chat.id ? "text-zinc-900" : "text-gray-500"}
-                      />
-                      {!isChatOnly && (
-                        <WorkflowSquare04Icon 
-                          size={12} 
+                    {/* Top Row: Icon + Title */}
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <BubbleChatIcon 
+                          size={16} 
                           strokeWidth={2} 
-                          className="text-gray-600"
+                          className={currentProjectId === chat.id ? "text-zinc-900" : "text-gray-500"}
                         />
-                      )}
+                        {!isChatOnly && (
+                          <WorkflowSquare04Icon 
+                            size={11} 
+                            strokeWidth={2} 
+                            className={currentProjectId === chat.id ? "text-zinc-600" : "text-gray-600"}
+                          />
+                        )}
+                      </div>
+                      <span className={`truncate flex-1 text-left font-medium ${
+                        currentProjectId === chat.id ? "text-zinc-900" : "text-zinc-100"
+                      }`}>
+                        {getShortenedTitle(chat.title)}
+                      </span>
                     </div>
-                    <span className="truncate flex-1 text-left">
-                      {getShortenedTitle(chat.title)}
-                    </span>
+                    
+                    {/* Bottom Row: Preview or Metadata */}
+                    {chat.last_message_preview && (
+                      <div className={`text-xs truncate text-left w-full pl-6 ${
+                        currentProjectId === chat.id ? "text-zinc-600" : "text-zinc-500"
+                      }`}>
+                        {chat.last_message_preview}
+                      </div>
+                    )}
+                    
+                    {/* Metadata Row: Model + Count + Time */}
+                    <div className={`flex items-center gap-2 text-xs pl-6 ${
+                      currentProjectId === chat.id ? "text-zinc-500" : "text-zinc-600"
+                    }`}>
+                      {chat.ai_model && (
+                        <span className="truncate">{chat.ai_model}</span>
+                      )}
+                      {chat.message_count !== undefined && chat.message_count > 0 && (
+                        <>
+                          {chat.ai_model && <span>•</span>}
+                          <span>{chat.message_count} msg{chat.message_count > 1 ? 's' : ''}</span>
+                        </>
+                      )}
+                      <span className="ml-auto flex-shrink-0">{getTimeAgo(chat.updated_at)}</span>
+                    </div>
                   </button>
                 );
               })
@@ -571,8 +641,27 @@ export default function Sidebar({
                     onMouseEnter={() => setHoveredChat(chat.id)}
                     onMouseLeave={() => setHoveredChat(null)}
                   >
-                    <p className="text-sm text-zinc-900 font-medium truncate">{chat.title}</p>
-                    <p className="text-xs text-zinc-500 mt-1">
+                    <p className="text-sm text-zinc-900 font-medium mb-2">{chat.title}</p>
+                    
+                    {chat.last_message_preview && (
+                      <p className="text-xs text-zinc-600 mb-2 line-clamp-2">
+                        {chat.last_message_preview}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                      {chat.ai_model && (
+                        <span className="truncate">{chat.ai_model}</span>
+                      )}
+                      {chat.message_count !== undefined && chat.message_count > 0 && (
+                        <>
+                          {chat.ai_model && <span>•</span>}
+                          <span>{chat.message_count} msg{chat.message_count > 1 ? 's' : ''}</span>
+                        </>
+                      )}
+                    </div>
+                    
+                    <p className="text-xs text-zinc-400 mt-1">
                       {new Date(chat.updated_at).toLocaleDateString()}
                     </p>
                   </div>
