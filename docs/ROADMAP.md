@@ -2,14 +2,15 @@
 
 ## 📊 Current Status (November 2025)
 
-**Version:** v0.3.0  
-**Phase:** 2 (AI Workflow Enhancement) - In Progress  
-**Completion:** Phase 0 ✅ | Phase 1 ✅ | Phase 2 🚧 (50%) | Phase 3 ⏳ | Phase 4 ⏳
+**Version:** v0.4.0  
+**Phase:** 2 (AI Workflow Enhancement) - Sprint 1 Complete  
+**Completion:** Phase 0 ✅ | Phase 1 ✅ | Phase 2 🚧 (Sprint 1 ✅) | Phase 3 ⏳ | Phase 4 ⏳
 
 ### Recent Milestones
-- ✅ **Phase 0 Complete** - Mind mapping foundation with ReactFlow
-- ✅ **Phase 1 Complete** - Full MVP with persistence, folders, chat history
-- 🚧 **Phase 2 In Progress** - Enhanced AI capabilities and export system
+- ✅ **Phase 0 Complete** - Mind mapping foundation with ReactFlow (October 2025)
+- ✅ **Phase 1 Complete** - Full MVP with persistence, folders, chat history, **EXPORT** (November 5, 2025)
+- ✅ **Sprint 1 Complete** - Multi-provider AI configuration (Ollama, OpenAI, Anthropic, Google, DeepSeek) (November 7, 2025)
+- 🚧 **Phase 2 In Progress** - Enhanced AI capabilities (multi-model, custom prompts)
 
 ---
 
@@ -115,37 +116,90 @@ This document outlines strategic questions, technical improvements, and a phased
 ### ✅ Phase 1: Complete the MVP Loop (COMPLETED)
 **Goal:** Create a fully functional single-user experience with persistence
 
-**Status:** ✅ **COMPLETE** - November 2025
+**Status:** ✅ **COMPLETE** - November 5, 2025
 
 **Completed Features:**
-1. ✅ **Canvas/Mind Map persistence** - Auto-save mind map state to SQLite
+1. ✅ **Canvas/Mind Map persistence** - Auto-save mind map state to SQLite (2-second delay)
 2. ✅ **Node CRUD operations** - Create, read, update, delete nodes and connections
-3. ✅ **List views** - Show past projects with search/filter
-4. ✅ **Canvas → AI integration** - Extract nodes/structure and pass to AI
-5. ✅ **Chat history persistence** - Save/load conversation history per project
-6. ✅ **Folder organization** - Create and organize projects in folders
-7. ✅ **Project management** - Full CRUD for mind maps and projects
-8. ✅ **Home screen** - Modern UI with recent projects and quick actions
-9. ✅ **Settings system** - Theme, AI provider, and customization options
+3. ✅ **List views** - Show past projects with search/filter by folder
+4. ✅ **Canvas → AI integration** - Extract full node structure and pass to AI
+5. ✅ **Better AI context extraction** - Comprehensive context with nodes, edges, template, progress
+6. ✅ **Chat history persistence** - Save/load conversation history per project
+7. ✅ **Folder organization** - Create and organize projects in folders
+8. ✅ **Project management** - Full CRUD for mind maps and projects
+9. ✅ **Home screen** - Modern UI with recent projects and quick actions
+10. ✅ **Settings system** - Theme, AI provider, and customization options
+11. ✅ **Export blueprints** - Export to Markdown and YAML with download/copy
+    - ✅ Markdown format with full node details
+    - ✅ YAML format with structured data
+    - ✅ Copy to clipboard functionality
+    - ✅ Download as file (.md or .yaml)
+    - ✅ Live preview before export
 
-### 🚧 Phase 2: Enhance AI Workflow (IN PROGRESS)
-**Goal:** Make AI generation more powerful and customizable
+### 📋 Phase 2: Enhanced Features & UX (PLANNED)
+**Goal:** Advanced project management, AI configuration, and UX polish
 
-**Status:** 🚧 **IN PROGRESS** - Partially Complete
+**Status:** 📋 **PLANNING COMPLETE** - Ready to start Sprint 1
 
-**Completed:**
-1. ✅ **Multi-turn chat** - Users can refine through back-and-forth conversation
-2. ✅ **AI suggestion system** - AI analyzes context and suggests improvements
-3. ✅ **Streaming responses** - Real-time character-by-character AI responses
-4. ✅ **Context extraction** - AI reads full mind map context automatically
+**See:** [PHASE_2_FEATURE_SPEC.md](../PHASE_2_FEATURE_SPEC.md) for full specification
 
-**Pending:**
-5. ⏳ **Template system for exports** - Predefined blueprint formats (API spec, feature doc, etc.)
-6. ⏳ **Context selection UI** - Checkboxes to choose which notes/nodes to include
-7. ⏳ **Export options** - Export as markdown, YAML, PDF, or to GitHub
-8. ⏳ **Blueprint generation** - Generate specification documents from mind maps
-9. ⏳ **Custom AI prompts** - Allow users to customize AI behavior
-10. ⏳ **Multi-model support** - Switch between GPT-4, Claude, Gemini, etc.
+**Phase 2 Features (v0.4.0):**
+
+#### Sprint 1: AI Provider Configuration (Week 1-2) ✅ COMPLETE
+**Status:** ✅ **COMPLETE** - November 7, 2025
+
+**Completed Features:**
+1. ✅ **Multi-provider support** - Ollama, OpenAI, Anthropic, Google Gemini, DeepSeek
+   - ✅ Base AIProvider interface with abstract methods
+   - ✅ 5 provider implementations with streaming support
+   - ✅ Provider factory for easy instantiation
+2. ✅ **Provider settings UI** - Configuration panel in settings modal
+   - ✅ Tabbed settings interface (Appearance | AI Providers)
+   - ✅ Provider selection dropdown
+   - ✅ API key input with show/hide toggle
+   - ✅ Base URL configuration
+3. ✅ **Model selection** - Choose specific models per provider
+   - ✅ "Load models" button to fetch available models
+   - ✅ Manual model input fallback
+   - ✅ Default models for each provider
+4. ✅ **Connection validation** - Test provider connections
+   - ✅ One-click connection testing
+   - ✅ Real-time status feedback (green/red indicators)
+   - ✅ Detailed error messages and model discovery
+5. ✅ **API key management** - Secure storage
+   - ✅ LocalStorage persistence (local only, never sent to servers)
+   - ✅ Show/hide toggle for security
+
+**API Endpoints:**
+- `GET /providers/available` - List all providers
+- `GET /providers/info` - Get provider metadata
+- `POST /providers/test` - Test connection
+- `POST /providers/models` - List available models
+- `POST /providers/validate` - Validate configuration
+
+**Documentation:** See `docs/SPRINT_1_COMPLETE.md` for full details
+
+#### Sprint 2: Project Hierarchy (Week 3-4)
+6. ⏳ **Project system** - Folders → Projects → Chats → Mind Maps
+7. ⏳ **Multi-chat per project** - Multiple conversations within one project
+8. ⏳ **Project management** - Create, edit, organize projects
+9. ⏳ **Breadcrumb navigation** - Easy navigation through hierarchy
+
+#### Sprint 3: Advanced Features (Week 5-6)
+10. ⏳ **Delete functionality** - Delete chats, projects, folders with confirmation
+11. ⏳ **Cross-project AI** - AI can reference information across projects
+12. ⏳ **Privacy controls** - Control which projects AI can access
+
+#### Sprint 4: UX Polish (Week 7-8)
+13. ⏳ **Wallpaper backgrounds** - Custom backgrounds with auto-contrast
+14. ⏳ **Node hover icons** - Delete, undo, redo buttons on hover
+15. ⏳ **Enhanced connection handles** - Larger, easier-to-use handles
+16. ⏳ **Undo/Redo system** - Full action history with keyboard shortcuts
+17. ⏳ **Improved zoom/pan** - Better mind map navigation
+
+**Estimated Time:** 6-8 weeks  
+**Documentation:** Complete ✅  
+**Next Step:** Begin Sprint 1
 
 ### Phase 3: Collaboration & Sharing (3-4 weeks)
 **Goal:** Enable team workflows and sharing

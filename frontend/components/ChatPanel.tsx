@@ -5,6 +5,8 @@ import { Template } from "@/lib/templates";
 import { ProgressMetrics } from "@/lib/progress";
 import SuggestionCard from "./SuggestionCard";
 import ThinkingLogo from "./ThinkingLogo";
+import CustomSelect from "./CustomSelect";
+import { getModelsWithStatus, getProviderFromModel } from "@/lib/providerUtils";
 import {
   Copy01Icon,
   RepeatIcon,
@@ -17,7 +19,9 @@ import {
   Menu01Icon,
   Home01Icon,
   HierarchyIcon,
-  Settings02Icon
+  Settings02Icon,
+  Download01Icon,
+  CheckmarkCircle02Icon
 } from "@hugeicons/react";
 
 const API = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
@@ -56,6 +60,7 @@ type ChatPanelProps = {
   onToggleSidebar?: () => void;
   onGoHome?: () => void;
   onOpenSettings?: () => void;
+  onOpenExport?: () => void;  // Open export modal
   initialMessage?: string | null;
   savedChatHistory?: Message[];  // Pre-existing chat history to restore
   onMessageSent?: () => void;
@@ -66,6 +71,8 @@ type ChatPanelProps = {
   onNodesChange?: (nodes: Node[]) => void;
   onEdgesChange?: (edges: Edge[]) => void;
   onProjectRename?: (newTitle: string) => void;  // Handle project rename
+  selectedModel: string;
+  onModelChange: (model: string) => void;
 };
 
 export default function ChatPanel({ 
@@ -78,6 +85,7 @@ export default function ChatPanel({
   onToggleSidebar,
   onGoHome,
   onOpenSettings,
+  onOpenExport,
   initialMessage,
   savedChatHistory,
   onMessageSent,
@@ -87,8 +95,28 @@ export default function ChatPanel({
   onChatHistoryUpdate,
   onNodesChange,
   onEdgesChange,
-  onProjectRename
+  onProjectRename,
+  selectedModel,
+  onModelChange
 }: ChatPanelProps) {
+  // Available model options
+  const modelOptions = [
+    "Ollama - Llama 3.2",
+    "OpenAI - GPT-4",
+    "Anthropic - Claude 3.5",
+    "DeepSeek - Coder V2"
+  ];
+  
+  // Handle unconfigured model selection - redirect to settings
+  const handleUnconfiguredModel = (modelName: string) => {
+    const providerKey = getProviderFromModel(modelName);
+    if (providerKey && onOpenSettings) {
+      // Store the provider to pre-select in settings
+      sessionStorage.setItem("openProviderSettings", providerKey);
+      onOpenSettings();
+    }
+  };
+  
   // Initialize messages: use saved history if available, otherwise show welcome
   const getInitialMessages = () => {
     if (savedChatHistory && savedChatHistory.length > 0) {
@@ -117,9 +145,72 @@ export default function ChatPanel({
   const [isApplyingSuggestions, setIsApplyingSuggestions] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [chatWallpaper, setChatWallpaper] = useState<string | null>(null);
+  const [wallpaperBlur, setWallpaperBlur] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load wallpaper from localStorage
+  useEffect(() => {
+    const savedWallpapers = localStorage.getItem("chatWallpapers");
+    const savedSelectedId = localStorage.getItem("selectedWallpaperId");
+    const savedBlur = localStorage.getItem("wallpaperBlur");
+    const customBackgroundEnabled = localStorage.getItem("customBackground") === "true";
+    
+    console.log("💬 ChatPanel loading wallpaper:", { 
+      savedWallpapers: !!savedWallpapers, 
+      savedSelectedId, 
+      savedBlur,
+      customBackgroundEnabled 
+    });
+    
+    // Only show wallpaper if customBackground is enabled
+    if (customBackgroundEnabled && savedWallpapers && savedSelectedId) {
+      try {
+        const wallpapers = JSON.parse(savedWallpapers);
+        const selectedWallpaper = wallpapers.find((w: any) => w.id === savedSelectedId);
+        console.log("💬 Found wallpaper:", selectedWallpaper?.name);
+        setChatWallpaper(selectedWallpaper?.image || null);
+      } catch (e) {
+        console.error("Failed to load wallpaper:", e);
+        setChatWallpaper(null);
+      }
+    } else {
+      console.log("💬 Custom background disabled or no wallpaper, clearing...");
+      setChatWallpaper(null);
+    }
+    
+    if (savedBlur) {
+      setWallpaperBlur(Number(savedBlur));
+      console.log("💬 Wallpaper blur set to:", savedBlur);
+    }
+
+    // Listen for wallpaper changes
+    const handleWallpaperChange = (e: CustomEvent) => {
+      console.log("💬 Wallpaper changed event received:", !!e.detail);
+      
+      // Check if custom background is enabled
+      const isEnabled = localStorage.getItem("customBackground") === "true";
+      
+      if (e.detail && isEnabled) {
+        setChatWallpaper(e.detail.image || e.detail);
+      } else {
+        setChatWallpaper(null);
+      }
+      
+      // Reload blur setting
+      const currentBlur = localStorage.getItem("wallpaperBlur");
+      if (currentBlur) {
+        setWallpaperBlur(Number(currentBlur));
+      }
+    };
+
+    window.addEventListener('chatWallpaperChanged', handleWallpaperChange as EventListener);
+    return () => {
+      window.removeEventListener('chatWallpaperChanged', handleWallpaperChange as EventListener);
+    };
+  }, []);
 
   // Load chat history and handle resumption
   useEffect(() => {
@@ -552,18 +643,60 @@ export default function ChatPanel({
   };
 
   const containerClass = isFocusMode
-    ? "flex flex-col h-full bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950"
-    : "flex flex-col h-full";
+    ? "flex flex-col h-full bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 relative"
+    : "flex flex-col h-full relative";
 
   return (
     <div className={containerClass}>
+      {/* Wallpaper Background Layer - applies to entire ChatPanel */}
+      {chatWallpaper && (
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${chatWallpaper})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed',
+            filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : 'none'
+          }}
+        />
+      )}
+      
+      {/* Content Layer - never blurred */}
+      <div className="relative z-10 flex flex-col h-full">
       {/* Header - Only in focus mode */}
       {isFocusMode && (
         <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-3">
           <div className="flex items-center gap-3">
             <div className="text-sm font-semibold text-gray-200">AI Chat</div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {/* AI Model Selector */}
+            <div className="min-w-[200px]">
+              <CustomSelect
+                value={selectedModel}
+                onChange={onModelChange}
+                options={getModelsWithStatus(modelOptions)}
+                placeholder="Select a model"
+                isDark={true}
+                onSelectUnconfigured={handleUnconfiguredModel}
+              />
+            </div>
+            {onOpenExport && (
+              <button
+                onClick={onOpenExport}
+                disabled={nodes.length === 0}
+                className={`p-2 rounded-lg transition-colors ${
+                  nodes.length === 0
+                    ? 'text-gray-600 cursor-not-allowed'
+                    : 'text-gray-400 hover:text-white hover:bg-zinc-800'
+                }`}
+                title="Export Specification"
+              >
+                <Download01Icon size={18} strokeWidth={2} />
+              </button>
+            )}
             {onToggleFocus && (
               <button
                 onClick={onToggleFocus}
@@ -592,7 +725,8 @@ export default function ChatPanel({
         onScroll={handleScroll}
         className={`flex-1 overflow-y-auto ${isFocusMode ? 'px-4 pb-4' : 'px-3 pb-3'} relative`}
       >
-        <div className={`${isFocusMode ? 'max-w-3xl mx-auto' : ''} space-y-4 ${isFocusMode ? 'py-4' : 'py-2'}`}>
+        {/* Content Layer */}
+        <div className={`relative z-10 ${isFocusMode ? 'max-w-3xl mx-auto' : ''} space-y-4 ${isFocusMode ? 'py-4' : 'py-2'}`}>
           {messages.map((msg, idx) => (
             <div
               key={msg.id || idx}
@@ -601,12 +735,18 @@ export default function ChatPanel({
               onMouseLeave={() => setHoveredMessageId(null)}
             >
               <div className={`${isFocusMode ? 'max-w-[80%]' : 'w-full'} ${msg.role === "user" ? "ml-auto" : ""}`}>
-                {/* Message bubble - monochromatic design */}
+                {/* Message bubble - elegant dark theme matching Synapse AI */}
                 <div
                   className={`relative rounded-2xl ${isFocusMode ? 'px-4 py-3' : 'px-3 py-2'} ${
                     msg.role === "user"
-                      ? "bg-zinc-800 text-white"
-                      : isFocusMode ? "bg-zinc-800/50 text-gray-200" : "bg-zinc-100 text-zinc-900"
+                      ? chatWallpaper 
+                        ? "bg-zinc-800/90 backdrop-blur-lg text-white shadow-xl"
+                        : "bg-zinc-800 text-white"
+                      : isFocusMode 
+                        ? chatWallpaper
+                          ? "bg-zinc-800/85 backdrop-blur-lg text-white shadow-lg"
+                          : "bg-zinc-800/50 text-gray-200"
+                        : "bg-zinc-100 text-zinc-900"
                   }`}
                 >
                   <div className={`whitespace-pre-wrap ${isFocusMode ? 'text-[15px]' : 'text-xs'} leading-relaxed ${msg.role === "assistant" ? 'pr-8' : ''}`}>
@@ -656,11 +796,15 @@ export default function ChatPanel({
             <div className="flex justify-start">
               <div className={`${isFocusMode ? 'max-w-[80%]' : 'w-full'}`}>
                 <div className={`rounded-2xl ${isFocusMode ? 'px-4 py-3' : 'px-3 py-2'} ${
-                  isFocusMode ? 'bg-zinc-800/50 text-gray-200' : 'bg-zinc-100 text-zinc-900'
+                  isFocusMode 
+                    ? chatWallpaper
+                      ? 'bg-zinc-800/85 backdrop-blur-lg text-white shadow-lg'
+                      : 'bg-zinc-800/50 text-gray-200'
+                    : 'bg-zinc-100 text-zinc-900'
                 }`}>
                   <div className={`whitespace-pre-wrap ${isFocusMode ? 'text-[15px]' : 'text-xs'} leading-relaxed`}>
                     {streamingMessage}
-                    <span className="inline-block w-1 h-4 ml-1 animate-pulse bg-gray-400"></span>
+                    <span className="inline-block w-1 h-4 ml-1 animate-pulse bg-white/60"></span>
                   </div>
                 </div>
               </div>
@@ -703,7 +847,9 @@ export default function ChatPanel({
               onApprove={handleApproveSuggestions}
               onReject={handleRejectSuggestions}
               autoApply={isApplyingSuggestions}
-            nodes={nodes}
+              nodes={nodes}
+              isDark={isFocusMode}
+              hasWallpaper={!!chatWallpaper}
             />
           </div>
         )}
@@ -713,23 +859,23 @@ export default function ChatPanel({
         <div className={`${isFocusMode ? 'max-w-3xl mx-auto' : 'w-full'}`}>
           <div className={`relative rounded-2xl border transition-all ${
             isFocusMode 
-              ? 'border-zinc-700 hover:border-zinc-600' 
-              : 'border-zinc-300 hover:border-zinc-400'
+              ? chatWallpaper
+                ? 'bg-zinc-800/90 backdrop-blur-md border-white/20 hover:border-white/30 shadow-xl'
+                : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50'
+              : chatWallpaper
+                ? 'bg-white border-zinc-200 hover:border-zinc-300 shadow-lg'
+                : 'border-zinc-300 hover:border-zinc-400 bg-white'
           }`}>
-            {/* Model selector and icons row */}
+            {/* Active model display */}
             <div className={`flex items-center gap-2 px-4 pt-3 pb-2 ${
               isFocusMode ? 'border-b border-zinc-700' : 'border-b border-zinc-200'
             }`}>
-              <select className={`text-xs px-2 py-1 rounded-md border transition-colors cursor-pointer font-medium ${
-                isFocusMode 
-                  ? 'bg-zinc-800 border-zinc-700 text-gray-300 hover:bg-zinc-700 hover:border-zinc-600' 
-                  : 'bg-zinc-50 border-zinc-300 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-400'
-              } focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-opacity-50`}>
-                <option value="ollama-llama" className={isFocusMode ? 'bg-zinc-800' : 'bg-white'}>Ollama - Llama 3.2</option>
-                <option value="openai-gpt4" className={isFocusMode ? 'bg-zinc-800' : 'bg-white'}>OpenAI - GPT-4</option>
-                <option value="anthropic-claude" className={isFocusMode ? 'bg-zinc-800' : 'bg-white'}>Anthropic - Claude 3.5</option>
-                <option value="deepseek-coder" className={isFocusMode ? 'bg-zinc-800' : 'bg-white'}>DeepSeek - Coder V2</option>
-              </select>
+              <CheckmarkCircle02Icon size={16} className="text-green-500" strokeWidth={2} />
+              <span className={`text-xs font-medium ${
+                isFocusMode ? 'text-gray-400' : 'text-zinc-600'
+              }`}>
+                {selectedModel}
+              </span>
               <div className="flex-1"></div>
             </div>
             
@@ -774,6 +920,7 @@ export default function ChatPanel({
           </div>
         </div>
       </div>
+      </div> {/* End Content Layer */}
     </div>
   );
 }

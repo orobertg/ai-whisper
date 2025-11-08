@@ -5,10 +5,11 @@ import ChatPanel from "@/components/ChatPanel";
 import Sidebar from "@/components/Sidebar";
 import HomeContent from "@/components/HomeContent";
 import Settings from "@/components/Settings";
+import ExportModal from "@/components/ExportModal";
 import { Template, TEMPLATES } from "@/lib/templates";
 import { calculateProgress } from "@/lib/progress";
 import { Node, Edge } from "reactflow";
-import { AiNetworkIcon, Settings02Icon, Home01Icon, FloppyDiskIcon, Menu01Icon, Cancel01Icon, MessageMultiple01Icon, HierarchyIcon, SidebarRight01Icon } from "@hugeicons/react";
+import { AiNetworkIcon, Settings02Icon, Home01Icon, FloppyDiskIcon, Menu01Icon, Cancel01Icon, MessageMultiple01Icon, HierarchyIcon, SidebarRight01Icon, Download01Icon } from "@hugeicons/react";
 
 type ViewMode = "home" | "editor";
 
@@ -45,13 +46,17 @@ export default function Home() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [chatFocusMode, setChatFocusMode] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [recentChats, setRecentChats] = useState<RecentChat[]>([]);
   const [initialChatMessage, setInitialChatMessage] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState("Ollama - Llama 3.2");
   const [currentChatHistory, setCurrentChatHistory] = useState<any[]>([]);
+  const [homeWallpaper, setHomeWallpaper] = useState<string | null>(null);
+  const [wallpaperBlur, setWallpaperBlur] = useState<number>(0);
 
   // Calculate progress metrics
   const progressMetrics = selectedTemplate 
@@ -67,6 +72,83 @@ export default function Home() {
   useEffect(() => {
     loadRecentChats();
   }, [selectedFolderId]);
+
+  // Load wallpaper from localStorage for home page
+  useEffect(() => {
+    const savedWallpapers = localStorage.getItem("chatWallpapers");
+    const savedSelectedId = localStorage.getItem("selectedWallpaperId");
+    const savedBlur = localStorage.getItem("wallpaperBlur");
+    const customBackgroundEnabled = localStorage.getItem("customBackground") === "true";
+    
+    console.log("🏠 Home loading wallpaper:", { 
+      savedWallpapers: !!savedWallpapers, 
+      savedSelectedId, 
+      savedBlur,
+      customBackgroundEnabled 
+    });
+    
+    // Only show wallpaper if customBackground is enabled
+    if (customBackgroundEnabled && savedWallpapers && savedSelectedId) {
+      try {
+        const wallpapers = JSON.parse(savedWallpapers);
+        
+        // Check if wallpapers array is not empty
+        if (wallpapers && Array.isArray(wallpapers) && wallpapers.length > 0) {
+          const selectedWallpaper = wallpapers.find((w: any) => w.id === savedSelectedId);
+          
+          if (selectedWallpaper && selectedWallpaper.image) {
+            console.log("🏠 Found wallpaper for home:", selectedWallpaper?.name);
+            setHomeWallpaper(selectedWallpaper.image);
+          } else {
+            // Wallpaper ID exists but wallpaper not found - clear it
+            console.log("🏠 Wallpaper ID exists but wallpaper not found, clearing...");
+            setHomeWallpaper(null);
+          }
+        } else {
+          // Wallpapers array is empty - clear everything
+          console.log("🏠 Wallpapers array is empty, clearing...");
+          setHomeWallpaper(null);
+        }
+      } catch (e) {
+        console.error("Failed to load home wallpaper:", e);
+        setHomeWallpaper(null);
+      }
+    } else {
+      // Custom background is disabled or no wallpaper data
+      console.log("🏠 Custom background disabled or no wallpaper, clearing...");
+      setHomeWallpaper(null);
+    }
+    
+    if (savedBlur) {
+      setWallpaperBlur(Number(savedBlur));
+      console.log("🏠 Wallpaper blur set to:", savedBlur);
+    }
+
+    // Listen for wallpaper changes
+    const handleWallpaperChange = (e: CustomEvent) => {
+      console.log("🏠 Home wallpaper changed event received:", !!e.detail);
+      
+      // Check if custom background is enabled
+      const isEnabled = localStorage.getItem("customBackground") === "true";
+      
+      if (e.detail && isEnabled) {
+        setHomeWallpaper(e.detail.image || e.detail);
+      } else {
+        setHomeWallpaper(null);
+      }
+      
+      // Reload blur setting
+      const currentBlur = localStorage.getItem("wallpaperBlur");
+      if (currentBlur) {
+        setWallpaperBlur(Number(currentBlur));
+      }
+    };
+
+    window.addEventListener('chatWallpaperChanged', handleWallpaperChange as EventListener);
+    return () => {
+      window.removeEventListener('chatWallpaperChanged', handleWallpaperChange as EventListener);
+    };
+  }, []);
 
   async function loadFolders() {
     try {
@@ -482,6 +564,8 @@ export default function Home() {
               }).catch(err => console.error("Failed to save chat history:", err));
             }
           }}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
         />
         </div>
         
@@ -516,6 +600,7 @@ export default function Home() {
               setCurrentChatHistory([]); // Clear chat history when going home
             }}
             onOpenSettings={() => setShowSettings(true)}
+            onOpenExport={() => setShowExportModal(true)}
             initialMessage={initialChatMessage}
             savedChatHistory={currentChatHistory}
             onMessageSent={() => setInitialChatMessage(null)}
@@ -543,10 +628,20 @@ export default function Home() {
               setEdges(newEdges);
               setHasUnsavedChanges(true);
             }}
+            selectedModel={selectedModel}
+            onModelChange={setSelectedModel}
           />
         </div>
         
         <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+        <ExportModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          nodes={nodes}
+          edges={edges}
+          template={selectedTemplate}
+          projectTitle={currentMindMap?.title || "Untitled Project"}
+        />
       </div>
     );
   }
@@ -554,11 +649,28 @@ export default function Home() {
   // Main layout with persistent sidebar
   return (
     <div className="h-screen flex bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 relative overflow-hidden">
+      {/* Wallpaper Background Layer - separate from content */}
+      {viewMode === "home" && homeWallpaper && (
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${homeWallpaper})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed',
+            filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : 'none'
+          }}
+        />
+      )}
+      
+      {/* Content Layer - on top of wallpaper, never blurred */}
+      <div className="relative z-10 flex w-full h-full">
       {/* Persistent Sidebar with slide animation */}
       <div 
         className={`transition-all duration-300 ease-in-out ${
           showSidebar ? 'translate-x-0 w-64' : '-translate-x-full w-0'
-        } flex-shrink-0 overflow-hidden`}
+        } flex-shrink-0 overflow-hidden relative z-20`}
       >
         <Sidebar
           onNewChat={handleNewChat}
@@ -596,6 +708,8 @@ export default function Home() {
               }).catch(err => console.error("Failed to save chat history:", err));
             }
           }}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
         />
       </div>
 
@@ -621,6 +735,9 @@ export default function Home() {
           selectedFolderId={selectedFolderId}
           folders={folders}
           recentChats={recentChats.slice(0, 3)}
+          hasWallpaper={!!homeWallpaper}
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
         />
       ) : (
         <main className="flex-1 flex flex-col">
@@ -650,6 +767,20 @@ export default function Home() {
                 title={isSaving ? "Saving..." : hasUnsavedChanges ? "Save" : "Saved"}
               >
                 <FloppyDiskIcon size={16} strokeWidth={2} />
+              </button>
+              
+              {/* Export Button */}
+              <button
+                onClick={() => setShowExportModal(true)}
+                disabled={nodes.length === 0}
+                className={`p-2 rounded-lg transition-colors ${
+                  nodes.length === 0
+                    ? 'text-gray-600 cursor-not-allowed'
+                    : 'text-gray-400 hover:text-white hover:bg-zinc-800'
+                }`}
+                title="Export Specification"
+              >
+                <Download01Icon size={18} strokeWidth={2} />
               </button>
               
               {/* Toggle to Chat Mode */}
@@ -689,6 +820,17 @@ export default function Home() {
 
       {/* Settings Modal */}
       <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        nodes={nodes}
+        edges={edges}
+        template={selectedTemplate}
+        projectTitle={currentMindMap?.title || "Untitled Project"}
+      />
+      </div> {/* End Content Layer */}
     </div>
   );
 }

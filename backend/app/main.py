@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .db import init_db
-from .routes import notes, blueprints, mindmaps, chat, evaluate, folders, suggestions
+from .routes import notes, blueprints, mindmaps, chat, evaluate, folders, suggestions, providers
 
 app = FastAPI(title="AI Whisper API", version="0.1.0")
 
@@ -24,6 +24,7 @@ app.include_router(mindmaps.router)
 app.include_router(chat.router)
 app.include_router(suggestions.router)
 app.include_router(evaluate.router)
+app.include_router(providers.router)
 
 @app.get("/healthz")
 def healthz():

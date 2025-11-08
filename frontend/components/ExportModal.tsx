@@ -1,0 +1,401 @@
+"use client";
+import { useState } from "react";
+import { Node, Edge } from "reactflow";
+import { Template } from "@/lib/templates";
+import { 
+  Cancel01Icon, 
+  Download01Icon, 
+  FileScriptIcon, 
+  FileValidationIcon,
+  Copy01Icon,
+  CheckmarkCircle02Icon
+} from "@hugeicons/react";
+
+type ExportFormat = "markdown" | "yaml";
+
+type ExportModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  nodes: Node[];
+  edges: Edge[];
+  template: Template | null;
+  projectTitle: string;
+};
+
+export default function ExportModal({
+  isOpen,
+  onClose,
+  nodes,
+  edges,
+  template,
+  projectTitle,
+}: ExportModalProps) {
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("markdown");
+  const [isCopied, setIsCopied] = useState(false);
+  const [exportContent, setExportContent] = useState("");
+
+  if (!isOpen) return null;
+
+  // Generate Markdown export
+  const generateMarkdown = (): string => {
+    const lines: string[] = [];
+    
+    // Header
+    lines.push(`# ${projectTitle || "Project Specification"}\n`);
+    lines.push(`**Generated:** ${new Date().toLocaleDateString()}\n`);
+    if (template) {
+      lines.push(`**Template:** ${template.name}\n`);
+    }
+    lines.push("---\n");
+
+    // Overview
+    lines.push("## Overview\n");
+    lines.push(`This specification contains ${nodes.length} component${nodes.length !== 1 ? 's' : ''} `);
+    lines.push(`with ${edges.length} relationship${edges.length !== 1 ? 's' : ''}.\n\n`);
+
+    // Group nodes by type
+    const nodesByType: Record<string, Node[]> = {};
+    nodes.forEach((node) => {
+      const type = node.type || "unknown";
+      if (!nodesByType[type]) {
+        nodesByType[type] = [];
+      }
+      nodesByType[type].push(node);
+    });
+
+    // Export each node type
+    const typeNames: Record<string, string> = {
+      feature: "Features",
+      technical: "Technical Requirements",
+      userstory: "User Stories",
+      datamodel: "Data Models",
+      notes: "Notes",
+      todo: "Tasks & Checklists",
+    };
+
+    Object.entries(nodesByType).forEach(([type, typeNodes]) => {
+      const typeName = typeNames[type] || type.charAt(0).toUpperCase() + type.slice(1);
+      lines.push(`## ${typeName}\n`);
+      
+      typeNodes.forEach((node, idx) => {
+        const label = node.data.label || "Untitled";
+        const description = node.data.description || "";
+        
+        lines.push(`### ${idx + 1}. ${label}\n`);
+        
+        if (description) {
+          lines.push(`${description}\n\n`);
+        }
+
+        // Type-specific fields
+        if (type === "feature") {
+          if (node.data.status) lines.push(`**Status:** ${node.data.status}\n`);
+          if (node.data.priority) lines.push(`**Priority:** ${node.data.priority}\n`);
+        } else if (type === "technical") {
+          if (node.data.technology) lines.push(`**Technology:** ${node.data.technology}\n`);
+        } else if (type === "userstory") {
+          if (node.data.persona) lines.push(`**Persona:** ${node.data.persona}\n`);
+        } else if (type === "datamodel") {
+          if (node.data.fields && Array.isArray(node.data.fields)) {
+            lines.push(`**Fields:**\n`);
+            node.data.fields.forEach((field: string) => {
+              lines.push(`- ${field}\n`);
+            });
+          }
+        } else if (type === "todo" && node.data.todos) {
+          lines.push(`**Tasks:**\n`);
+          node.data.todos.forEach((todo: { text: string; completed: boolean }) => {
+            lines.push(`- [${todo.completed ? 'x' : ' '}] ${todo.text}\n`);
+          });
+        } else if (type === "notes" && node.data.content) {
+          lines.push(`${node.data.content}\n`);
+        }
+
+        // Connections from this node
+        const outgoingEdges = edges.filter((edge) => edge.source === node.id);
+        if (outgoingEdges.length > 0) {
+          lines.push(`\n**Connections:**\n`);
+          outgoingEdges.forEach((edge) => {
+            const targetNode = nodes.find((n) => n.id === edge.target);
+            const targetLabel = targetNode?.data.label || edge.target;
+            const edgeLabel = edge.label || "→";
+            lines.push(`- ${edgeLabel} ${targetLabel}\n`);
+          });
+        }
+        
+        lines.push("\n");
+      });
+    });
+
+    // Relationships section
+    if (edges.length > 0) {
+      lines.push("## Relationships\n");
+      lines.push("This section shows all connections between components.\n\n");
+      edges.forEach((edge, idx) => {
+        const sourceNode = nodes.find((n) => n.id === edge.source);
+        const targetNode = nodes.find((n) => n.id === edge.target);
+        const sourceLabel = sourceNode?.data.label || edge.source;
+        const targetLabel = targetNode?.data.label || edge.target;
+        const edgeLabel = edge.label || "connects to";
+        lines.push(`${idx + 1}. **${sourceLabel}** ${edgeLabel} **${targetLabel}**\n`);
+      });
+      lines.push("\n");
+    }
+
+    // Footer
+    lines.push("---\n");
+    lines.push(`*Generated by AI Whisper - Specification Assistant*\n`);
+
+    return lines.join("");
+  };
+
+  // Generate YAML export
+  const generateYAML = (): string => {
+    const lines: string[] = [];
+    
+    // Header
+    lines.push(`# Project Specification\n`);
+    lines.push(`# Generated: ${new Date().toISOString()}\n\n`);
+    
+    lines.push(`project:\n`);
+    lines.push(`  title: "${projectTitle || "Untitled Project"}"\n`);
+    if (template) {
+      lines.push(`  template: "${template.id}"\n`);
+    }
+    lines.push(`  generated_at: "${new Date().toISOString()}"\n`);
+    lines.push(`  node_count: ${nodes.length}\n`);
+    lines.push(`  edge_count: ${edges.length}\n\n`);
+
+    // Components
+    lines.push(`components:\n`);
+    nodes.forEach((node) => {
+      lines.push(`  - id: "${node.id}"\n`);
+      lines.push(`    type: "${node.type}"\n`);
+      lines.push(`    label: "${node.data.label || "Untitled"}"\n`);
+      
+      if (node.data.description) {
+        const desc = node.data.description.replace(/"/g, '\\"');
+        lines.push(`    description: "${desc}"\n`);
+      }
+      
+      // Type-specific fields
+      if (node.type === "feature") {
+        if (node.data.status) lines.push(`    status: "${node.data.status}"\n`);
+        if (node.data.priority) lines.push(`    priority: "${node.data.priority}"\n`);
+      } else if (node.type === "technical") {
+        if (node.data.technology) lines.push(`    technology: "${node.data.technology}"\n`);
+      } else if (node.type === "userstory") {
+        if (node.data.persona) lines.push(`    persona: "${node.data.persona}"\n`);
+      } else if (node.type === "datamodel" && node.data.fields) {
+        lines.push(`    fields:\n`);
+        node.data.fields.forEach((field: string) => {
+          lines.push(`      - "${field}"\n`);
+        });
+      } else if (node.type === "todo" && node.data.todos) {
+        lines.push(`    tasks:\n`);
+        node.data.todos.forEach((todo: { text: string; completed: boolean }) => {
+          lines.push(`      - text: "${todo.text}"\n`);
+          lines.push(`        completed: ${todo.completed}\n`);
+        });
+      } else if (node.type === "notes" && node.data.content) {
+        const content = node.data.content.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+        lines.push(`    content: "${content}"\n`);
+      }
+      
+      lines.push(`\n`);
+    });
+
+    // Relationships
+    if (edges.length > 0) {
+      lines.push(`relationships:\n`);
+      edges.forEach((edge) => {
+        lines.push(`  - source: "${edge.source}"\n`);
+        lines.push(`    target: "${edge.target}"\n`);
+        if (edge.label) {
+          lines.push(`    type: "${edge.label}"\n`);
+        }
+        lines.push(`\n`);
+      });
+    }
+
+    return lines.join("");
+  };
+
+  const handleGenerate = () => {
+    if (selectedFormat === "markdown") {
+      setExportContent(generateMarkdown());
+    } else {
+      setExportContent(generateYAML());
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(exportContent);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([exportContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const ext = selectedFormat === "markdown" ? "md" : "yaml";
+    const filename = `${projectTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_spec.${ext}`;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-zinc-200 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-900">Export Specification</h2>
+            <p className="text-sm text-zinc-500 mt-1">
+              Generate documentation from your mind map
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-zinc-400 hover:text-zinc-600 transition-colors"
+          >
+            <Cancel01Icon size={24} strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Format Selection */}
+        <div className="px-6 py-4 border-b border-zinc-200">
+          <label className="text-sm font-medium text-zinc-700 mb-3 block">
+            Export Format
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => {
+                setSelectedFormat("markdown");
+                setExportContent("");
+              }}
+              className={`p-4 rounded-xl border-2 transition-all text-left ${
+                selectedFormat === "markdown"
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-zinc-200 hover:border-zinc-300"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <FileScriptIcon size={24} className={selectedFormat === "markdown" ? "text-blue-600" : "text-zinc-400"} strokeWidth={2} />
+                <div>
+                  <div className="font-medium text-zinc-900">Markdown</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">
+                    Human-readable format
+                  </div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedFormat("yaml");
+                setExportContent("");
+              }}
+              className={`p-4 rounded-xl border-2 transition-all text-left ${
+                selectedFormat === "yaml"
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-zinc-200 hover:border-zinc-300"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <FileValidationIcon size={24} className={selectedFormat === "yaml" ? "text-blue-600" : "text-zinc-400"} strokeWidth={2} />
+                <div>
+                  <div className="font-medium text-zinc-900">YAML</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">
+                    Structured data format
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Preview */}
+        {exportContent ? (
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="px-6 py-3 border-b border-zinc-200 flex items-center justify-between">
+              <span className="text-sm font-medium text-zinc-700">Preview</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+                >
+                  {isCopied ? (
+                    <>
+                      <CheckmarkCircle02Icon size={16} className="text-green-600" strokeWidth={2} />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy01Icon size={16} strokeWidth={2} />
+                      Copy
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg transition-colors"
+                >
+                  <Download01Icon size={16} strokeWidth={2} />
+                  Download
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto px-6 py-4">
+              <pre className="text-xs font-mono text-zinc-700 whitespace-pre-wrap break-words">
+                {exportContent}
+              </pre>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center px-6 py-12">
+            <div className="text-center">
+              <div className="text-4xl mb-4">📄</div>
+              <p className="text-zinc-600 mb-4">
+                Click "Generate" to create your {selectedFormat === "markdown" ? "Markdown" : "YAML"} specification
+              </p>
+              <button
+                onClick={handleGenerate}
+                className="px-6 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-colors"
+              >
+                Generate Export
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        {exportContent && (
+          <div className="px-6 py-4 border-t border-zinc-200 flex justify-between items-center">
+            <div className="text-xs text-zinc-500">
+              {nodes.length} components • {edges.length} connections
+            </div>
+            <button
+              onClick={onClose}
+              className="px-5 py-2 text-sm font-medium text-zinc-700 hover:text-zinc-900 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
