@@ -26,7 +26,7 @@ type SettingsProps = {
 };
 
 export default function Settings({ isOpen, onClose, initialTab, initialProvider }: SettingsProps) {
-  const { setTheme: setGlobalTheme } = useTheme();
+  const { setTheme: setGlobalTheme, isLight, getTextClass, getBorderClass } = useTheme();
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab || "appearance");
   const [theme, setTheme] = useState<Theme>("system");
   const [customBackground, setCustomBackground] = useState(false);
@@ -261,60 +261,66 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
 
   if (!isOpen) return null;
 
+  const bgClass = isLight ? 'bg-white' : 'bg-zinc-900';
+  const borderClass = getBorderClass();
+  const textPrimary = getTextClass('primary');
+  const textSecondary = getTextClass('secondary');
+  const textMuted = getTextClass('muted');
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={handleClose}>
-      <div className={`bg-white rounded-3xl shadow-2xl w-full mx-4 ${
-        activeTab === "providers" ? "max-w-4xl" : "max-w-xl"
+      <div className={`${bgClass} rounded-3xl shadow-2xl w-full mx-4 flex flex-col ${
+        activeTab === "providers" ? "max-w-4xl max-h-[85vh]" : "max-w-xl max-h-[80vh]"
       }`} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="px-6 py-5 border-b border-zinc-200">
-          <div className="flex items-center gap-2 text-zinc-900">
+        <div className={`px-6 py-5 border-b ${borderClass} flex-shrink-0`}>
+          <div className={`flex items-center gap-2 ${textPrimary}`}>
             <Settings02Icon size={20} strokeWidth={2} />
             <h2 className="text-lg font-semibold">Settings</h2>
           </div>
         </div>
         
         {/* Tabs */}
-        <div className="flex border-b border-zinc-200">
+        <div className={`flex border-b ${borderClass} flex-shrink-0`}>
           <button
             onClick={() => setActiveTab("appearance")}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors relative ${
               activeTab === "appearance"
-                ? "text-zinc-900"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? textPrimary
+                : `${textMuted} ${isLight ? 'hover:text-zinc-700' : 'hover:text-zinc-300'}`
             }`}
           >
             Appearance
             {activeTab === "appearance" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900" />
+              <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${isLight ? 'bg-zinc-900' : 'bg-white'}`} />
             )}
           </button>
           <button
             onClick={() => setActiveTab("providers")}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors relative flex items-center justify-center gap-2 ${
               activeTab === "providers"
-                ? "text-zinc-900"
-                : "text-zinc-500 hover:text-zinc-700"
+                ? textPrimary
+                : `${textMuted} ${isLight ? 'hover:text-zinc-700' : 'hover:text-zinc-300'}`
             }`}
           >
             <AiNetworkIcon size={16} strokeWidth={2} />
             AI Providers
             {activeTab === "providers" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900" />
+              <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${isLight ? 'bg-zinc-900' : 'bg-white'}`} />
             )}
           </button>
         </div>
         
-        {/* Tab Content */}
-        <div className={`px-6 py-6 ${activeTab === "providers" ? "" : "space-y-8"}`}>
+        {/* Tab Content - Scrollable */}
+        <div className={`px-6 py-6 overflow-y-auto flex-1 ${activeTab === "providers" ? "" : "space-y-8"}`}>
           {/* Appearance Tab */}
           {activeTab === "appearance" && (
             <>
           {/* Interface Theme Section */}
           <div>
             <div className="mb-3">
-              <h3 className="text-sm font-semibold text-zinc-900">Interface Theme</h3>
-              <p className="text-xs text-zinc-500 mt-0.5">Select or customize your UI theme</p>
+              <h3 className={`text-sm font-semibold ${textPrimary}`}>Interface Theme</h3>
+              <p className={`text-xs ${textSecondary} mt-0.5`}>Select or customize your UI theme</p>
             </div>
             
             <div className="grid grid-cols-3 gap-4">
@@ -324,7 +330,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
                 className={`group relative rounded-2xl border-2 transition-all overflow-hidden ${
                   theme === "system"
                     ? "border-blue-500 shadow-md"
-                    : "border-zinc-200 hover:border-zinc-300"
+                    : `${borderClass.replace('border-', 'border-2 border-')} hover:border-zinc-300 ${isLight ? '' : 'hover:border-zinc-600'}`
                 }`}
               >
                 <div className="aspect-[4/3] bg-gradient-to-br from-zinc-100 to-zinc-200 p-3">
@@ -361,7 +367,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
                 className={`group relative rounded-2xl border-2 transition-all overflow-hidden ${
                   theme === "light"
                     ? "border-blue-500 shadow-md"
-                    : "border-zinc-200 hover:border-zinc-300"
+                    : `${borderClass.replace('border-', 'border-2 border-')} hover:border-zinc-300 ${isLight ? '' : 'hover:border-zinc-600'}`
                 }`}
               >
                 <div className="aspect-[4/3] bg-white p-3">
@@ -398,7 +404,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
                 className={`group relative rounded-2xl border-2 transition-all overflow-hidden ${
                   theme === "dark"
                     ? "border-blue-500 shadow-md"
-                    : "border-zinc-200 hover:border-zinc-300"
+                    : `${borderClass.replace('border-', 'border-2 border-')} hover:border-zinc-300 ${isLight ? '' : 'hover:border-zinc-600'}`
                 }`}
               >
                 <div className="aspect-[4/3] bg-zinc-900 p-3">
@@ -432,10 +438,10 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
           </div>
 
           {/* Background Option */}
-          <div className="flex items-center justify-between py-3 border-b border-zinc-100">
+          <div className={`flex items-center justify-between py-3 border-b ${borderClass}`}>
             <div>
-              <h3 className="text-sm font-medium text-zinc-900">Background</h3>
-              <p className="text-xs text-zinc-500 mt-0.5">Customize your background</p>
+              <h3 className={`text-sm font-medium ${textPrimary}`}>Background</h3>
+              <p className={`text-xs ${textSecondary} mt-0.5`}>Customize your background</p>
             </div>
             <button
               onClick={() => {
@@ -455,10 +461,10 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
           </div>
 
           {/* Chat Color Option */}
-          <div className="flex items-center justify-between py-3 border-b border-zinc-100">
+          <div className={`flex items-center justify-between py-3 border-b ${borderClass}`}>
             <div>
-              <h3 className="text-sm font-medium text-zinc-900">Chat Color</h3>
-              <p className="text-xs text-zinc-500 mt-0.5">Customize your chat</p>
+              <h3 className={`text-sm font-medium ${textPrimary}`}>Chat Color</h3>
+              <p className={`text-xs ${textSecondary} mt-0.5`}>Customize your chat</p>
             </div>
             <button
               onClick={() => {
@@ -481,8 +487,8 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
           {customBackground && (
             <div className="py-3">
               <div className="mb-3">
-                <h3 className="text-sm font-semibold text-zinc-900">Chat Wallpapers</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Select or upload custom backgrounds for the chat area</p>
+                <h3 className={`text-sm font-semibold ${textPrimary}`}>Chat Wallpapers</h3>
+                <p className={`text-xs ${textSecondary} mt-0.5`}>Select or upload custom backgrounds for the chat area</p>
               </div>
             
             <div className="grid grid-cols-3 gap-4">
@@ -492,7 +498,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
                 className={`group relative rounded-2xl border-2 transition-all overflow-hidden ${
                   selectedWallpaperId === null
                     ? "border-blue-500 shadow-md"
-                    : "border-zinc-200 hover:border-zinc-300"
+                    : `${borderClass.replace('border-', 'border-2 border-')} hover:border-zinc-300 ${isLight ? '' : 'hover:border-zinc-600'}`
                 }`}
               >
                 <div className="aspect-[4/3] bg-zinc-100 flex items-center justify-center relative">
@@ -520,7 +526,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
                   className={`group relative rounded-2xl border-2 transition-all overflow-hidden ${
                     selectedWallpaperId === wallpaper.id
                       ? "border-blue-500 shadow-md"
-                      : "border-zinc-200 hover:border-zinc-300"
+                      : `${borderClass.replace('border-', 'border-2 border-')} hover:border-zinc-300 ${isLight ? '' : 'hover:border-zinc-600'}`
                   }`}
                 >
                   <button
@@ -591,11 +597,11 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
 
             {/* Blur Control - Only show when a wallpaper is selected */}
             {selectedWallpaperId && selectedWallpaperId !== 'null' && (
-              <div className="mt-6 p-4 bg-zinc-50 rounded-xl border border-zinc-200">
+              <div className={`mt-6 p-4 rounded-xl border ${isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-800/50 border-zinc-700'}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h4 className="text-sm font-medium text-zinc-900">Wallpaper Blur</h4>
-                    <p className="text-xs text-zinc-500 mt-0.5">Add blur effect to wallpaper</p>
+                    <h4 className={`text-sm font-medium ${textPrimary}`}>Wallpaper Blur</h4>
+                    <p className={`text-xs ${textSecondary} mt-0.5`}>Add blur effect to wallpaper</p>
                   </div>
                   <span className="text-sm font-semibold text-blue-600">{wallpaperBlur}px</span>
                 </div>
@@ -631,10 +637,14 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-zinc-200 flex justify-end items-center gap-3">
+        <div className={`px-6 py-4 border-t ${borderClass} flex justify-end items-center gap-3 flex-shrink-0`}>
           <button
             onClick={handleClose}
-            className="px-5 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
+            className={`px-5 py-2 text-sm font-medium rounded-xl transition-colors ${
+              isLight 
+                ? 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100' 
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+            }`}
           >
             Close
           </button>
@@ -643,8 +653,8 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
             disabled={activeTab === "appearance" ? !hasChanges : !providerHasChanges}
             className={`px-6 py-2 text-sm font-medium rounded-xl transition-colors ${
               (activeTab === "appearance" ? hasChanges : providerHasChanges)
-                ? "bg-zinc-900 hover:bg-zinc-800 text-white"
-                : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+                ? `${isLight ? 'bg-zinc-900 hover:bg-zinc-800' : 'bg-white hover:bg-zinc-100'} ${isLight ? 'text-white' : 'text-zinc-900'}`
+                : `${isLight ? 'bg-zinc-200 text-zinc-400' : 'bg-zinc-800 text-zinc-600'} cursor-not-allowed`
             }`}
           >
             Save

@@ -27,7 +27,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem('systemTheme') || 'light';
+                  let theme = localStorage.getItem('systemTheme') || 'light';
+                  
+                  // Handle "system" theme by detecting OS preference
+                  if (theme === 'system') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    theme = prefersDark ? 'dark' : 'light';
+                  }
+                  
                   document.documentElement.classList.remove('light', 'dark');
                   document.documentElement.classList.add(theme);
                 } catch (e) {

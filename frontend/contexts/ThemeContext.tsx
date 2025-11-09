@@ -52,8 +52,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Default to 'light' for SSR to match expected initial render
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     if (typeof window !== 'undefined') {
-      const savedTheme = (localStorage.getItem('systemTheme') as ThemeMode) || 'light';
-      return savedTheme;
+      let savedTheme = localStorage.getItem('systemTheme') || 'light';
+      
+      // Handle "system" theme by detecting OS preference and converting to light/dark
+      if (savedTheme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return prefersDark ? 'dark' : 'light';
+      }
+      
+      return savedTheme as ThemeMode;
     }
     return 'light'; // SSR default
   });
@@ -84,9 +91,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     // Re-sync theme from localStorage after mount to ensure consistency
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('systemTheme') as ThemeMode;
+      let savedTheme = localStorage.getItem('systemTheme');
+      
+      // Handle "system" theme by detecting OS preference
+      if (savedTheme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        savedTheme = prefersDark ? 'dark' : 'light';
+      }
+      
       if (savedTheme && savedTheme !== theme) {
-        setThemeState(savedTheme);
+        setThemeState(savedTheme as ThemeMode);
       }
     }
   }, []);
@@ -94,8 +108,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Listen for theme/wallpaper changes
   useEffect(() => {
     const handleThemeChange = () => {
-      const newTheme = localStorage.getItem('systemTheme') as ThemeMode || 'light';
-      setThemeState(newTheme);
+      let newTheme = localStorage.getItem('systemTheme') || 'light';
+      
+      // Handle "system" theme by detecting OS preference
+      if (newTheme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        newTheme = prefersDark ? 'dark' : 'light';
+      }
+      
+      setThemeState(newTheme as ThemeMode);
     };
     
     const handleWallpaperChange = () => {
