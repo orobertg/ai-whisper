@@ -7,6 +7,7 @@ export const MODEL_TO_PROVIDER: Record<string, string> = {
   "Ollama - Llama 3.2": "ollama",
   "OpenAI - GPT-4": "openai",
   "Anthropic - Claude 3.5": "anthropic",
+  "Google - Gemini 2.0": "google",
   "DeepSeek - Coder V2": "deepseek",
 };
 

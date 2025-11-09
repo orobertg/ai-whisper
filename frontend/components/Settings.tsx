@@ -5,7 +5,7 @@ import ProviderSettings from "./ProviderSettings";
 import { analyzeImageBrightness } from "@/lib/imageAnalyzer";
 import { useTheme } from "@/contexts/ThemeContext";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light" | "dark" | "translucent" | "system";
 
 type SettingsTab = "appearance" | "providers";
 
@@ -63,7 +63,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
       applyTheme(savedTheme);
       
       // Sync with ThemeContext
-      if (savedTheme === 'light' || savedTheme === 'dark') {
+      if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'translucent') {
         setGlobalTheme(savedTheme);
       } else if (savedTheme === 'system') {
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -111,8 +111,8 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
     applyTheme(newTheme); // Apply immediately for preview
     setHasChanges(true);
     
-    // Update global theme context for light/dark (system theme will be handled by applyTheme)
-    if (newTheme === 'light' || newTheme === 'dark') {
+    // Update global theme context
+    if (newTheme === 'light' || newTheme === 'dark' || newTheme === 'translucent') {
       setGlobalTheme(newTheme);
     } else if (newTheme === 'system') {
       // For system theme, detect preference and set accordingly
@@ -128,8 +128,8 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
     if (activeTab === "appearance") {
     localStorage.setItem("systemTheme", theme);
     
-    // Also update the ThemeContext with the resolved theme (light or dark)
-    if (theme === 'light' || theme === 'dark') {
+    // Also update the ThemeContext with the resolved theme
+    if (theme === 'light' || theme === 'dark' || theme === 'translucent') {
       setGlobalTheme(theme);
     } else if (theme === 'system') {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -141,17 +141,20 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
       localStorage.setItem("chatWallpapers", JSON.stringify(wallpapers));
       localStorage.setItem("wallpaperBlur", String(wallpaperBlur));
       
-      if (selectedWallpaperId && selectedWallpaperId !== 'null') {
+      // Handle wallpaper selection
+      if (customBackground && selectedWallpaperId && selectedWallpaperId !== 'null') {
         localStorage.setItem("selectedWallpaperId", selectedWallpaperId);
         const selectedWallpaper = wallpapers.find(w => w.id === selectedWallpaperId);
         console.log("🎨 Saving wallpaper:", selectedWallpaper?.name, "ID:", selectedWallpaperId);
-        // Dispatch event with full wallpaper data including brightness
+        // Dispatch events to notify all components of wallpaper change
+        window.dispatchEvent(new CustomEvent('wallpaperChanged'));
         window.dispatchEvent(new CustomEvent('chatWallpaperChanged', { 
           detail: selectedWallpaper || null 
         }));
       } else {
         console.log("🎨 Removing wallpaper - clearing localStorage");
         localStorage.removeItem("selectedWallpaperId");
+        window.dispatchEvent(new CustomEvent('wallpaperChanged'));
         window.dispatchEvent(new CustomEvent('chatWallpaperChanged', { detail: null }));
       }
       
@@ -323,7 +326,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
               <p className={`text-xs ${textSecondary} mt-0.5`}>Select or customize your UI theme</p>
             </div>
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               {/* System Preference */}
               <button
                 onClick={() => handleThemeChange("system")}
@@ -431,6 +434,43 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
                       <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
                     <span className="text-xs font-medium text-zinc-700">Dark</span>
+                  </div>
+                </div>
+              </button>
+
+              {/* Translucent Mode */}
+              <button
+                onClick={() => handleThemeChange("translucent")}
+                className={`group relative rounded-2xl border-2 transition-all overflow-hidden ${
+                  theme === "translucent"
+                    ? "border-blue-500 shadow-md"
+                    : `${borderClass.replace('border-', 'border-2 border-')} hover:border-zinc-300 ${isLight ? '' : 'hover:border-zinc-600'}`
+                }`}
+              >
+                <div className="aspect-[4/3] bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 p-3">
+                  {/* Preview mockup - translucent */}
+                  <div className="h-full bg-white/70 backdrop-blur-xl border border-white/40 rounded-lg p-2 space-y-1.5 shadow-2xl">
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-zinc-400"></div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="h-1.5 bg-zinc-300 rounded w-3/4"></div>
+                      <div className="h-1.5 bg-zinc-300 rounded w-1/2"></div>
+                    </div>
+                    <div className="bg-white/60 backdrop-blur-md border border-white/30 rounded p-1.5 space-y-0.5">
+                      <div className="h-1 bg-zinc-400 rounded w-full"></div>
+                      <div className="h-1 bg-zinc-400 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="px-3 py-2.5 bg-white border-t border-zinc-100">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-medium text-zinc-700">Translucent</span>
                   </div>
                 </div>
               </button>

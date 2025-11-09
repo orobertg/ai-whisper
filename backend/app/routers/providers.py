@@ -4,10 +4,13 @@ AI Providers API Router
 Endpoints for managing and testing AI provider configurations.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, HTTPException, Depends, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field, ValidationError
 from typing import Dict, List, Optional
 from sqlmodel import Session
+import json
 
 from ..ai_providers import ProviderFactory, create_provider
 from ..database import get_session
@@ -70,8 +73,8 @@ async def list_providers():
     ]
 
 
-@router.post("/test", response_model=ProviderTestResponse)
-async def test_provider(config: ProviderConfig):
+@router.api_route("/test", methods=["POST"])
+async def test_provider(request: Request):
     """
     Test connection to an AI provider.
     
@@ -92,10 +95,51 @@ async def test_provider(config: ProviderConfig):
             "base_url": "http://localhost:11434"
         }
     """
+    # Get raw body for debugging
+    try:
+        body = await request.json()
+        print(f"📦 Raw request body: {body}")
+    except Exception as e:
+        print(f"❌ Failed to parse request body: {e}")
+        return JSONResponse(content={
+            "provider": "unknown",
+            "connected": False,
+            "message": f"Invalid request body: {str(e)}",
+            "models": []
+        })
+    
+    # Validate and parse config
+    try:
+        config = ProviderConfig(**body)
+    except ValidationError as e:
+        print(f"❌ Validation error: {e}")
+        return JSONResponse(content={
+            "provider": body.get("name", "unknown"),
+            "connected": False,
+            "message": f"Configuration validation error: {str(e)}",
+            "models": []
+        })
+    except Exception as e:
+        print(f"❌ Unexpected validation error: {e}")
+        return JSONResponse(content={
+            "provider": body.get("name", "unknown"),
+            "connected": False,
+            "message": f"Unexpected error: {str(e)}",
+            "models": []
+        })
+    
     print(f"🔍 Received test request for provider: {config.name}")
     print(f"📝 Model: {config.model}")
     print(f"🔑 API Key provided: {bool(config.api_key)}")
     print(f"🌐 Base URL: {config.base_url}")
+    
+    # Special handling for Ollama running on host machine from Docker
+    if config.name == "ollama" and config.base_url:
+        # Replace localhost/127.0.0.1 with host.docker.internal for Docker
+        if "localhost" in config.base_url or "127.0.0.1" in config.base_url:
+            original_url = config.base_url
+            config.base_url = config.base_url.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+            print(f"🔄 Converted Docker localhost URL: {original_url} -> {config.base_url}")
     
     try:
         # Use a default model if none provided (for testing API key)
@@ -127,20 +171,23 @@ async def test_provider(config: ProviderConfig):
         # Test connection
         result = await provider.test_connection()
         
-        return ProviderTestResponse(
-            provider=config.name,
-            connected=result["connected"],
-            message=result["message"],
-            models=result.get("models", [])
-        )
+        return JSONResponse(content={
+            "provider": config.name,
+            "connected": result["connected"],
+            "message": result["message"],
+            "models": result.get("models", [])
+        })
     
     except Exception as e:
-        return ProviderTestResponse(
-            provider=config.name,
-            connected=False,
-            message=f"Error testing provider: {str(e)}",
-            models=[]
-        )
+        print(f"❌ Exception during test: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(content={
+            "provider": config.name,
+            "connected": False,
+            "message": f"Error testing provider: {str(e)}",
+            "models": []
+        })
 
 
 @router.post("/models", response_model=List[str])

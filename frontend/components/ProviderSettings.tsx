@@ -35,6 +35,12 @@ type TestResult = {
   error?: string;
 };
 
+type ProviderStatus = {
+  tested: boolean;
+  connected: boolean;
+  timestamp?: number;
+};
+
 type ProviderSettingsProps = {
   onHasChanges?: (hasChanges: boolean) => void;
   onSave?: () => void;
@@ -54,6 +60,8 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoadingProviders, setIsLoadingProviders] = useState(true);
+  const [providerStatuses, setProviderStatuses] = useState<Record<string, ProviderStatus>>({});
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
 
   // Notify parent of changes
   useEffect(() => {
@@ -75,6 +83,39 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
     
     setProviders(defaultProviders);
     setIsLoadingProviders(false);
+
+    // Load all provider statuses and active provider from localStorage
+    const savedConfigs = localStorage.getItem("ai_provider_configs");
+    if (savedConfigs) {
+      try {
+        const configs = JSON.parse(savedConfigs);
+        const statuses: Record<string, ProviderStatus> = {};
+        let foundActiveProvider: string | null = null;
+        
+        for (const [providerName, config] of Object.entries(configs)) {
+          const providerConfig = config as any;
+          if (providerConfig.tested !== undefined) {
+            statuses[providerName] = {
+              tested: providerConfig.tested === true,
+              connected: providerConfig.tested === true,
+              timestamp: providerConfig.test_timestamp
+            };
+          }
+          
+          // Check if this is the active provider
+          if (providerConfig.active === true) {
+            foundActiveProvider = providerName;
+          }
+        }
+        
+        setProviderStatuses(statuses);
+        setActiveProvider(foundActiveProvider);
+        console.log('📋 Loaded provider statuses:', statuses);
+        console.log('🎯 Active provider:', foundActiveProvider);
+      } catch (e) {
+        console.error("Failed to load provider statuses:", e);
+      }
+    }
 
     // Try to fetch from API (will update if successful)
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/providers/available`)
@@ -125,6 +166,18 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
           setModel(config.model || getDefaultModel(providerName));
           setApiKey(config.api_key || "");
           setBaseUrl(config.base_url || getDefaultBaseUrl(providerName));
+          
+          // Load provider status
+          if (config.tested !== undefined) {
+            setProviderStatuses(prev => ({
+              ...prev,
+              [providerName]: {
+                tested: config.tested === true,
+                connected: config.tested === true,
+                timestamp: config.test_timestamp
+              }
+            }));
+          }
           return;
         }
       } catch (e) {
@@ -152,7 +205,7 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
   // Get default base URL for a provider
   const getDefaultBaseUrl = (providerName: string) => {
     switch (providerName) {
-      case 'ollama': return 'http://localhost:11434';
+      case 'ollama': return 'http://host.docker.internal:11434';  // Use Docker host gateway
       case 'openai': return 'https://api.openai.com/v1';
       case 'anthropic': return 'https://api.anthropic.com/v1';
       case 'google': return 'https://generativelanguage.googleapis.com/v1beta';
@@ -174,15 +227,23 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
     setIsTesting(true);
     setTestResult(null);
 
-    const requestBody: Record<string, any> = {
-      name: selectedProvider,
+    // Build config object
+    const config: Record<string, any> = {
       model: model,
     };
 
-    if (apiKey) requestBody.api_key = apiKey;
-    if (baseUrl) requestBody.base_url = baseUrl;
+    if (apiKey) config.api_key = apiKey;
+    if (baseUrl) config.base_url = baseUrl;
+
+    // Build request body in the format the backend expects
+    const requestBody = {
+      provider: selectedProvider,
+      config: config
+    };
 
     try {
+      console.log(`🧪 Testing ${selectedProvider} connection...`);
+      console.log(`📦 Request body being sent:`, JSON.stringify(requestBody, null, 2));
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/providers/test`,
         {
@@ -193,17 +254,68 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
       );
 
       const result = await response.json();
+      console.log(`📡 Test result for ${selectedProvider}:`, result);
       setTestResult(result);
 
-      if (result.connected && result.models) {
+      // Update provider status
+      const newStatus: ProviderStatus = {
+        tested: true,
+        connected: result.connected,
+        timestamp: Date.now()
+      };
+      
+      setProviderStatuses(prev => ({
+        ...prev,
+        [selectedProvider]: newStatus
+      }));
+
+      // Load available models if connection succeeded
+      if (result.connected && result.models && result.models.length > 0) {
         setAvailableModels(result.models);
+        console.log(`✅ Found ${result.models.length} models for ${selectedProvider}`);
+      }
+
+      // Auto-save the configuration if test succeeded
+      if (result.connected) {
+        const savedConfigs = localStorage.getItem("ai_provider_configs");
+        let configs: Record<string, any> = {};
+        
+        if (savedConfigs) {
+          try {
+            configs = JSON.parse(savedConfigs);
+          } catch (e) {
+            console.error("Failed to parse saved configs:", e);
+          }
+        }
+
+        configs[selectedProvider] = {
+          model: model,
+          api_key: apiKey,
+          base_url: baseUrl,
+          tested: true,
+          test_timestamp: Date.now()
+        };
+
+        localStorage.setItem("ai_provider_configs", JSON.stringify(configs));
+        console.log(`💾 Auto-saved successful ${selectedProvider} configuration`);
       }
     } catch (error) {
+      console.error(`❌ Test connection error for ${selectedProvider}:`, error);
       setTestResult({
         connected: false,
-        message: "Failed to test connection",
+        message: "Failed to test connection - network error or server unavailable",
         error: String(error),
       });
+      
+      // Update provider status to show failed test
+      setProviderStatuses(prev => ({
+        ...prev,
+        [selectedProvider]: {
+          tested: true,
+          connected: false,
+          timestamp: Date.now()
+        }
+      }));
     } finally {
       setIsTesting(false);
     }
@@ -212,13 +324,19 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
   const handleLoadModels = async () => {
     setIsLoadingModels(true);
 
-    const requestBody: Record<string, any> = {
-      name: selectedProvider,
+    // Build config object
+    const config: Record<string, any> = {
       model: model,
     };
 
-    if (apiKey) requestBody.api_key = apiKey;
-    if (baseUrl) requestBody.base_url = baseUrl;
+    if (apiKey) config.api_key = apiKey;
+    if (baseUrl) config.base_url = baseUrl;
+
+    // Build request body in the format the backend expects
+    const requestBody = {
+      provider: selectedProvider,
+      config: config
+    };
 
     try {
       const response = await fetch(
@@ -232,13 +350,80 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
 
       if (response.ok) {
         const result = await response.json();
-        setAvailableModels(result || []);
+        console.log(`📋 Loaded models for ${selectedProvider}:`, result);
+        
+        // Handle different response formats
+        const modelsList = result.models || result || [];
+        setAvailableModels(modelsList);
+        
+        if (modelsList.length > 0) {
+          console.log(`✅ Successfully loaded ${modelsList.length} models`);
+        } else {
+          console.warn(`⚠️ No models returned for ${selectedProvider}`);
+        }
+      } else {
+        console.error(`❌ Failed to load models: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`Error details:`, errorText);
       }
     } catch (error) {
       console.error("Failed to load models:", error);
     } finally {
       setIsLoadingModels(false);
     }
+  };
+
+  const handleSetActive = () => {
+    // Load existing configs
+    const savedConfigs = localStorage.getItem("ai_provider_configs");
+    let configs: Record<string, any> = {};
+    
+    if (savedConfigs) {
+      try {
+        configs = JSON.parse(savedConfigs);
+      } catch (e) {
+        console.error("Failed to parse saved configs:", e);
+      }
+    }
+
+    // First, deactivate all providers
+    for (const providerName in configs) {
+      configs[providerName].active = false;
+    }
+
+    // Then activate the selected provider
+    if (configs[selectedProvider]) {
+      configs[selectedProvider].active = true;
+    } else {
+      // If config doesn't exist yet, create it
+      configs[selectedProvider] = {
+        model: model,
+        api_key: apiKey,
+        base_url: baseUrl,
+        tested: false,
+        active: true
+      };
+    }
+
+    localStorage.setItem("ai_provider_configs", JSON.stringify(configs));
+    setActiveProvider(selectedProvider);
+    console.log(`🎯 Set ${selectedProvider} as active provider`);
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('activeProviderChanged', {
+      detail: { provider: selectedProvider, model: model }
+    }));
+    
+    // Show feedback
+    setTestResult({
+      connected: true,
+      message: `${currentProvider?.display_name} is now your active AI provider!`,
+      models: []
+    });
+    
+    setTimeout(() => {
+      setTestResult(null);
+    }, 3000);
   };
 
   const handleSaveConfig = () => {
@@ -254,16 +439,25 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
       }
     }
 
-    // Save current provider config with tested flag
+    // Preserve test status if it exists
+    const existingConfig = configs[selectedProvider] || {};
+    const wasTested = existingConfig.tested || false;
+    const testTimestamp = existingConfig.test_timestamp;
+    const isActive = existingConfig.active || false;
+
+    // Save current provider config
     configs[selectedProvider] = {
       model: model,
       api_key: apiKey,
       base_url: baseUrl,
-      tested: testResult?.connected || false, // Save tested status
+      tested: wasTested,
+      test_timestamp: testTimestamp,
+      active: isActive  // Preserve active status
     };
 
     localStorage.setItem("ai_provider_configs", JSON.stringify(configs));
     setHasUnsavedChanges(false);
+    console.log(`💾 Saved ${selectedProvider} configuration`);
     
     // Show success feedback
     setTestResult({
@@ -320,42 +514,63 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
           <div className="text-sm text-zinc-500">No providers available</div>
         ) : (
           <div className="space-y-1">
-            {providers.map((provider) => (
-            <button
-              key={provider.name}
-              onClick={() => {
-                setSelectedProvider(provider.name);
-                setHasUnsavedChanges(true);
-              }}
-              className="w-full text-left px-3 py-2.5 rounded-lg transition-all hover:bg-zinc-100 flex items-center gap-3 group"
-            >
-              {/* Radio Bullet */}
-              <div className="flex-shrink-0">
-                {selectedProvider === provider.name ? (
-                  <div className="w-4 h-4 rounded-full border-[5px] border-blue-600"></div>
-                ) : (
-                  <div className="w-4 h-4 rounded-full border-2 border-zinc-300 group-hover:border-zinc-400"></div>
-                )}
-              </div>
+            {providers.map((provider) => {
+              const status = providerStatuses[provider.name];
+              const isConfigured = status?.tested && status?.connected;
+              const isActive = activeProvider === provider.name;
               
-              {/* Provider Icon */}
-              <div className="flex-shrink-0">
-                {getProviderIcon(provider.name)}
-              </div>
-              
-              {/* Provider Info */}
-              <div className="flex-1 min-w-0">
-                <div className={`text-sm font-medium ${
-                  selectedProvider === provider.name ? 'text-zinc-900' : 'text-zinc-700'
-                }`}>
-                  {provider.display_name}
-                </div>
-                <div className="text-xs text-zinc-500">
-                  {provider.requires_api_key ? 'Cloud' : 'Local'}
-                </div>
-              </div>
-            </button>
-            ))}
+              return (
+                <button
+                  key={provider.name}
+                  onClick={() => {
+                    setSelectedProvider(provider.name);
+                    setHasUnsavedChanges(true);
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-all hover:bg-zinc-100 flex items-center gap-3 group ${
+                    isActive ? 'bg-blue-50 border border-blue-200' : ''
+                  }`}
+                >
+                  {/* Radio Bullet */}
+                  <div className="flex-shrink-0">
+                    {selectedProvider === provider.name ? (
+                      <div className="w-4 h-4 rounded-full border-[5px] border-blue-600"></div>
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border-2 border-zinc-300 group-hover:border-zinc-400"></div>
+                    )}
+                  </div>
+                  
+                  {/* Provider Icon */}
+                  <div className="flex-shrink-0">
+                    {getProviderIcon(provider.name)}
+                  </div>
+                  
+                  {/* Provider Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-medium flex items-center gap-1.5 ${
+                      selectedProvider === provider.name ? 'text-zinc-900' : 'text-zinc-700'
+                    }`}>
+                      {provider.display_name}
+                      {isConfigured && (
+                        <CheckmarkCircle02Icon 
+                          size={14} 
+                          className="text-green-600 flex-shrink-0" 
+                          strokeWidth={2.5}
+                        />
+                      )}
+                    </div>
+                    <div className="text-xs font-medium">
+                      {isActive ? (
+                        <span className="text-blue-600">● Active</span>
+                      ) : isConfigured ? (
+                        <span className="text-zinc-500">✓ Configured</span>
+                      ) : (
+                        <span className="text-zinc-500">{provider.requires_api_key ? 'Cloud' : 'Local'}</span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -471,7 +686,7 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
           </div>
 
           {/* Test Connection */}
-          <div className="pt-2">
+          <div className="pt-2 space-y-2">
             <button
               onClick={handleTestConnection}
               disabled={isTesting}
@@ -486,6 +701,28 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
                 "Test Connection"
               )}
             </button>
+            
+            {/* Set as Active Provider Button */}
+            {testResult?.connected && (
+              <button
+                onClick={handleSetActive}
+                disabled={activeProvider === selectedProvider}
+                className={`w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                  activeProvider === selectedProvider
+                    ? 'bg-green-100 text-green-700 cursor-default border-2 border-green-300'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {activeProvider === selectedProvider ? (
+                  <>
+                    <CheckmarkCircle02Icon size={18} strokeWidth={2} />
+                    Active Provider
+                  </>
+                ) : (
+                  'Set as Active Provider'
+                )}
+              </button>
+            )}
 
             {/* Test Result */}
             {testResult && (
@@ -521,31 +758,36 @@ export default function ProviderSettings({ onHasChanges, onSave, initialProvider
                       {testResult.message || (testResult.connected ? "Connection successful!" : "Connection failed")}
                     </p>
                     {testResult.error && (
-                      <p className="text-xs text-red-700 mt-2 leading-relaxed break-words">
+                      <p className="text-xs text-red-700 mt-2 leading-relaxed break-words font-mono bg-red-100 p-2 rounded">
                         {testResult.error}
                       </p>
                     )}
                     {testResult.models && testResult.models.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs text-green-700 font-medium">
-                          ✓ Found {testResult.models.length} available model(s)
+                      <div className="mt-3">
+                        <p className="text-xs text-green-700 font-medium mb-1.5">
+                          Found {testResult.models.length} available model(s):
                         </p>
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {testResult.models.slice(0, 5).map((modelName) => (
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {testResult.models.slice(0, 8).map((modelName) => (
                             <span
                               key={modelName}
-                              className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded"
+                              className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium"
                             >
                               {modelName}
                             </span>
                           ))}
-                          {testResult.models.length > 5 && (
-                            <span className="text-xs text-green-700">
-                              +{testResult.models.length - 5} more
+                          {testResult.models.length > 8 && (
+                            <span className="text-xs text-green-700 font-medium px-2 py-1">
+                              +{testResult.models.length - 8} more
                             </span>
                           )}
                         </div>
                       </div>
+                    )}
+                    {testResult.connected && (
+                      <p className="text-xs text-green-600 mt-2 font-medium">
+                        ✓ Configuration automatically saved
+                      </p>
                     )}
                   </div>
                 </div>

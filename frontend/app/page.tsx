@@ -66,6 +66,68 @@ export default function Home() {
     ? calculateProgress(nodes, selectedTemplate)
     : { completeness: 0, successProbability: 0, missingItems: [], nodeTypeCounts: {} };
 
+  // Load active provider and model on mount
+  useEffect(() => {
+    const savedConfigs = localStorage.getItem("ai_provider_configs");
+    
+    if (savedConfigs) {
+      try {
+        const configs = JSON.parse(savedConfigs);
+        
+        // Find the active provider
+        for (const [providerName, config] of Object.entries(configs)) {
+          const providerConfig = config as any;
+          
+          if (providerConfig.active === true) {
+            // Map provider name to display format
+            const providerDisplayMap: Record<string, string> = {
+              'ollama': 'Ollama - Llama 3.2',
+              'openai': 'OpenAI - GPT-4',
+              'anthropic': 'Anthropic - Claude 3.5',
+              'google': 'Google - Gemini 2.0',
+              'deepseek': 'DeepSeek - Coder V2'
+            };
+            
+            const displayName = providerDisplayMap[providerName];
+            if (displayName) {
+              setSelectedModel(displayName);
+            }
+            break;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load active provider:", e);
+      }
+    }
+  }, []);
+
+  // Listen for active provider changes
+  useEffect(() => {
+    const handleActiveProviderChange = (event: CustomEvent) => {
+      const { provider } = event.detail;
+      
+      // Map provider name to display format
+      const providerDisplayMap: Record<string, string> = {
+        'ollama': 'Ollama - Llama 3.2',
+        'openai': 'OpenAI - GPT-4',
+        'anthropic': 'Anthropic - Claude 3.5',
+        'google': 'Google - Gemini 2.0',
+        'deepseek': 'DeepSeek - Coder V2'
+      };
+      
+      const displayName = providerDisplayMap[provider];
+      if (displayName) {
+        setSelectedModel(displayName);
+      }
+    };
+
+    window.addEventListener('activeProviderChanged', handleActiveProviderChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('activeProviderChanged', handleActiveProviderChange as EventListener);
+    };
+  }, []);
+
   // Load folders and chats
   useEffect(() => {
     loadFolders();

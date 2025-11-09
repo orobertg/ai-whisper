@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'translucent';
 
 export interface Wallpaper {
   id: string;
@@ -17,6 +17,7 @@ interface ThemeContextType {
   setTheme: (theme: ThemeMode) => void;
   isLight: boolean;
   isDark: boolean;
+  isTranslucent: boolean;
   
   // Wallpaper
   wallpaper: Wallpaper | null;
@@ -165,10 +166,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   
   const isLight = theme === 'light';
   const isDark = theme === 'dark';
+  const isTranslucent = theme === 'translucent';
   const hasWallpaper = !!wallpaper;
   
   // Helper functions for consistent styling
   const getCardClass = () => {
+    if (isTranslucent) {
+      // Enhanced frosted glass effect for tiles - increased opacity for visibility
+      return hasWallpaper
+        ? 'bg-white/10 backdrop-blur-lg border-white/10 shadow-xl'
+        : 'bg-white/[0.15] backdrop-blur-2xl border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12)]';
+    }
     if (hasWallpaper) {
       return isLight
         ? 'bg-white/95 backdrop-blur-sm border-zinc-200 shadow-lg'
@@ -180,6 +188,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
   
   const getInputClass = () => {
+    if (isTranslucent) {
+      // Subtle glassmorphism input matching Synapse style
+      return hasWallpaper
+        ? 'bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder-zinc-400 shadow-xl'
+        : 'bg-white/10 backdrop-blur-xl border-white/20 text-white placeholder-zinc-400 shadow-xl';
+    }
     if (hasWallpaper) {
       return isLight
         ? 'bg-white/95 backdrop-blur-sm border-zinc-200 text-zinc-900 placeholder-zinc-400 shadow-lg'
@@ -195,11 +209,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       return 'bg-blue-500 hover:bg-blue-600 text-white border-blue-600';
     }
     if (variant === 'ghost') {
+      if (isTranslucent) {
+        return 'text-zinc-300 hover:bg-white/10 backdrop-blur-md';
+      }
       return isLight
         ? 'text-zinc-700 hover:bg-zinc-100'
         : 'text-zinc-300 hover:bg-zinc-800';
     }
     // secondary
+    if (isTranslucent) {
+      // Subtle glassmorphism buttons matching Synapse
+      return hasWallpaper
+        ? 'bg-white/10 backdrop-blur-xl border-white/20 text-white hover:bg-white/15 shadow-xl'
+        : 'bg-white/10 backdrop-blur-xl border-white/20 text-white hover:bg-white/15 shadow-xl';
+    }
     if (hasWallpaper) {
       return isLight
         ? 'bg-white/95 backdrop-blur-sm border-zinc-200 text-zinc-700 hover:bg-zinc-50 shadow-lg'
@@ -212,12 +235,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   
   const getTextClass = (variant: 'primary' | 'secondary' | 'muted' = 'primary') => {
     if (variant === 'muted') {
-      return isLight ? 'text-zinc-500' : 'text-zinc-500';
+      return isTranslucent ? 'text-zinc-500' : (isLight ? 'text-zinc-500' : 'text-zinc-500');
     }
     if (variant === 'secondary') {
-      return isLight ? 'text-zinc-700' : 'text-zinc-400';
+      return isTranslucent ? 'text-zinc-400' : (isLight ? 'text-zinc-700' : 'text-zinc-400');
     }
-    return isLight ? 'text-zinc-900' : 'text-zinc-100';
+    return isTranslucent ? 'text-white' : (isLight ? 'text-zinc-900' : 'text-zinc-100');
   };
   
   const getBadgeClass = (color: 'red' | 'orange' | 'green' | 'blue' | 'purple') => {
@@ -249,27 +272,37 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   
   // Header/Navigation helpers - for consistent header elements across all screens
   const getHeaderButtonClass = () => {
+    if (isTranslucent) {
+      return 'bg-zinc-800 backdrop-blur-xl border border-zinc-700 hover:bg-zinc-700 text-zinc-300 hover:text-white shadow-lg';
+    }
     return isLight
       ? 'bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900'
       : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-zinc-300 hover:text-white';
   };
   
   const getSelectClass = () => {
-    return { isDark: !isLight };
+    return { isDark: !isLight || isTranslucent };
   };
   
   const getSidebarClass = () => {
+    if (isTranslucent) {
+      return 'bg-zinc-900/50 backdrop-blur-2xl border-zinc-800';
+    }
     return isLight
       ? 'bg-white border-zinc-200'
       : 'bg-zinc-900/50 border-zinc-800';
   };
   
   const getBorderClass = () => {
+    if (isTranslucent) return 'border-zinc-800';
     return isLight ? 'border-zinc-200' : 'border-zinc-800';
   };
   
   // Kanban-specific helpers
   const getKanbanColumnClass = () => {
+    if (isTranslucent) {
+      return 'bg-zinc-900 backdrop-blur-xl border-zinc-800';
+    }
     if (hasWallpaper) {
       return 'bg-black/10 backdrop-blur-sm border-white/10';
     }
@@ -298,6 +331,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setTheme,
         isLight,
         isDark,
+        isTranslucent,
         wallpaper,
         setWallpaper,
         hasWallpaper,

@@ -104,6 +104,7 @@ export default function ChatPanel({
     "Ollama - Llama 3.2",
     "OpenAI - GPT-4",
     "Anthropic - Claude 3.5",
+    "Google - Gemini 2.0",
     "DeepSeek - Coder V2"
   ];
   

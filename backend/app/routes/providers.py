@@ -107,8 +107,16 @@ async def test_provider_connection(request: ProviderConfigRequest):
         Connection test results
     """
     try:
+        # Handle Docker networking for Ollama
+        config = request.config.copy()
+        if request.provider == "ollama" and "base_url" in config:
+            base_url = config["base_url"]
+            # Replace localhost/127.0.0.1 with host.docker.internal for Docker
+            if "localhost" in base_url or "127.0.0.1" in base_url:
+                config["base_url"] = base_url.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+        
         # Create provider instance
-        provider = create_provider(request.provider, **request.config)
+        provider = create_provider(request.provider, **config)
         
         # Test connection
         result = await provider.test_connection()
@@ -153,8 +161,16 @@ async def list_provider_models(request: ProviderConfigRequest):
         List of available models
     """
     try:
+        # Handle Docker networking for Ollama
+        config = request.config.copy()
+        if request.provider == "ollama" and "base_url" in config:
+            base_url = config["base_url"]
+            # Replace localhost/127.0.0.1 with host.docker.internal for Docker
+            if "localhost" in base_url or "127.0.0.1" in base_url:
+                config["base_url"] = base_url.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+        
         # Create provider instance
-        provider = create_provider(request.provider, **request.config)
+        provider = create_provider(request.provider, **config)
         
         # Get models
         models = await provider.list_models()

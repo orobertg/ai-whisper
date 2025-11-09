@@ -59,16 +59,23 @@ export default function HomeContent({
   selectedModel,
   onModelChange
 }: HomeContentProps) {
-  const { isLight, getHeaderButtonClass, getSelectClass } = useTheme();
+  const { isLight, isTranslucent, getHeaderButtonClass, getSelectClass } = useTheme();
   const [expandedAction, setExpandedAction] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // For translucent theme, always use withoutWallpaper variant (uses gradient background)
+  const effectiveHasWallpaper = isTranslucent ? false : hasWallpaper;
+  
+  // Debug logging
+  console.log("🎯 HomeContent - hasWallpaper:", hasWallpaper, "effectiveHasWallpaper:", effectiveHasWallpaper, "isTranslucent:", isTranslucent);
   
   // Available model options
   const modelOptions = [
     "Ollama - Llama 3.2",
     "OpenAI - GPT-4",
     "Anthropic - Claude 3.5",
+    "Google - Gemini 2.0",
     "DeepSeek - Coder V2"
   ];
   
@@ -165,23 +172,32 @@ export default function HomeContent({
   const headerClass = "h-14 px-6 flex items-center justify-end";
   
   // Use centralized theme styles for consistency
-  const textClass = getThemeStyle('text', hasWallpaper, isLight, 'primary');
-  const subtitleClass = getThemeStyle('text', hasWallpaper, isLight, 'secondary');
-  const buttonBaseClass = getThemeStyle('button', hasWallpaper, isLight, 'base');
-  const buttonActiveClass = getThemeStyle('button', hasWallpaper, isLight, 'active');
-  const expandedPanelClass = getThemeStyle('panel', hasWallpaper, isLight);
-  const cardClass = getThemeStyle('card', hasWallpaper, isLight);
-  const inputClass = getThemeStyle('input', hasWallpaper, isLight);
+  const textClass = getThemeStyle('text', effectiveHasWallpaper, isLight, 'primary', isTranslucent);
+  const subtitleClass = getThemeStyle('text', effectiveHasWallpaper, isLight, 'secondary', isTranslucent);
+  const buttonBaseClass = getThemeStyle('button', effectiveHasWallpaper, isLight, 'base', isTranslucent);
+  const buttonActiveClass = getThemeStyle('button', effectiveHasWallpaper, isLight, 'active', isTranslucent);
+  const expandedPanelClass = getThemeStyle('panel', effectiveHasWallpaper, isLight, undefined, isTranslucent);
+  const cardClass = getThemeStyle('card', effectiveHasWallpaper, isLight, undefined, isTranslucent);
+  const inputClass = getThemeStyle('input', effectiveHasWallpaper, isLight, undefined, isTranslucent);
   
-  const panelTextClass = hasWallpaper
+  // Home page specific styles - isolated for better theme consistency
+  const homeActionButtonClass = getThemeStyle('homeActionButton', effectiveHasWallpaper, isLight, undefined, isTranslucent);
+  const homeChatTileClass = getThemeStyle('homeChatTile', effectiveHasWallpaper, isLight, undefined, isTranslucent);
+  
+  // Debug cardClass
+  console.log("🎨 cardClass:", cardClass);
+  console.log("🏠 homeActionButtonClass:", homeActionButtonClass);
+  console.log("💬 homeChatTileClass:", homeChatTileClass);
+  
+  const panelTextClass = effectiveHasWallpaper
     ? isLight ? "text-zinc-900" : "text-white font-semibold"
     : isLight ? "text-zinc-900" : "text-white";
     
-  const panelSubtextClass = hasWallpaper
+  const panelSubtextClass = effectiveHasWallpaper
     ? isLight ? "text-zinc-700" : "text-white/90"
     : isLight ? "text-zinc-600" : "text-zinc-400";
     
-  const iconHoverClass = hasWallpaper
+  const iconHoverClass = effectiveHasWallpaper
     ? isLight ? "text-zinc-600 group-hover:text-blue-600" : "text-white/90 group-hover:text-white"
     : isLight ? "text-zinc-600 group-hover:text-blue-600" : "text-zinc-500 group-hover:text-zinc-300";
 
@@ -291,16 +307,16 @@ export default function HomeContent({
             <div className="flex gap-2 justify-start overflow-x-auto">
               <button
                 onClick={() => handleActionClick("create")}
-                className={`px-3 py-1.5 bg-transparent border rounded-md text-xs transition-all whitespace-nowrap flex-shrink-0 ${
-                  expandedAction === "create" ? buttonActiveClass : buttonBaseClass
+                className={`px-4 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap flex-shrink-0 ${
+                  expandedAction === "create" ? buttonActiveClass : homeActionButtonClass
                 }`}
               >
                 Create project
               </button>
               <button
                 onClick={() => handleActionClick("open")}
-                className={`px-3 py-1.5 bg-transparent border rounded-md text-xs transition-all whitespace-nowrap flex-shrink-0 ${
-                  expandedAction === "open" ? buttonActiveClass : buttonBaseClass
+                className={`px-4 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap flex-shrink-0 ${
+                  expandedAction === "open" ? buttonActiveClass : homeActionButtonClass
                 }`}
               >
                 Open project
@@ -326,7 +342,7 @@ export default function HomeContent({
                         <button
                           key={folder.id}
                           className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 ${
-                            hasWallpaper
+                            effectiveHasWallpaper
                               ? "bg-zinc-800/50 text-zinc-100 border border-zinc-700 hover:border-zinc-600"
                               : isLight
                                 ? "bg-zinc-50 text-zinc-700 border border-zinc-200 hover:border-zinc-300"
@@ -439,7 +455,7 @@ export default function HomeContent({
           {/* Recent Chats - Horizontal Cards */}
           {recentChats.length > 0 && (
             <div className={
-              hasWallpaper 
+              effectiveHasWallpaper 
                 ? isLight 
                   ? "bg-white rounded-xl p-4 shadow-lg" 
                   : "bg-zinc-900/95 backdrop-blur-xl border border-white/20 rounded-xl p-4 shadow-2xl"
@@ -461,7 +477,7 @@ export default function HomeContent({
                   return (
                     <div
                       key={chat.id}
-                      className={`p-4 ${cardClass}`}
+                      className={`p-4 ${homeChatTileClass}`}
                       onClick={() => handleProjectSelect(chat.id, 'chat')}
                     >
                       <div className="mb-2 flex items-center gap-1.5">
