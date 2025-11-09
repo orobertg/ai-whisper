@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { Template, TEMPLATES } from "@/lib/templates";
 import CustomSelect from "./CustomSelect";
 import { getModelsWithStatus, getProviderFromModel } from "@/lib/providerUtils";
+import { useTheme } from "@/contexts/ThemeContext";
+import { getThemeStyle } from "@/lib/themeStyles";
 import { 
   ArrowUp01Icon,
   Attachment02Icon,
@@ -57,6 +59,7 @@ export default function HomeContent({
   selectedModel,
   onModelChange
 }: HomeContentProps) {
+  const { isLight, getHeaderButtonClass, getSelectClass } = useTheme();
   const [expandedAction, setExpandedAction] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -157,127 +160,22 @@ export default function HomeContent({
   const greeting = getGreeting();
   const greetingIcon = getGreetingIcon();
 
-  // Adaptive styling based on wallpaper theme OR system theme when no wallpaper
-  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() => {
-    // Initialize theme from localStorage on first render
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-      
-      if (savedTheme === 'light') {
-        return 'light';
-      } else if (savedTheme === 'dark') {
-        return 'dark';
-      } else if (savedTheme === 'system' || !savedTheme) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return prefersDark ? 'dark' : 'light';
-      }
-    }
-    return 'dark'; // fallback
-  });
-  
-  // Check theme from localStorage and DOM on mount and when it changes
-  useEffect(() => {
-    const checkTheme = () => {
-      // First, check localStorage for user's theme preference
-      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
-      
-      console.log('🎨 HomeContent checking theme:', savedTheme);
-      
-      if (savedTheme === 'light') {
-        console.log('🎨 Setting light theme');
-        setSystemTheme('light');
-      } else if (savedTheme === 'dark') {
-        console.log('🎨 Setting dark theme');
-        setSystemTheme('dark');
-      } else if (savedTheme === 'system' || !savedTheme) {
-        // If system theme or not set, check OS preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        console.log('🎨 Using system theme, prefers dark:', prefersDark);
-        setSystemTheme(prefersDark ? 'dark' : 'light');
-      }
-    };
-    
-    checkTheme();
-    
-    // Watch for theme changes in DOM
-    const observer = new MutationObserver(() => {
-      console.log('🎨 DOM mutation detected, rechecking theme');
-      checkTheme();
-    });
-    observer.observe(document.documentElement, { 
-      attributes: true, 
-      attributeFilter: ['class'] 
-    });
-    
-    // Listen for custom theme change event from Settings
-    const handleThemeChange = () => {
-      console.log('🎨 Theme change event received');
-      checkTheme();
-    };
-    window.addEventListener('themeChanged', handleThemeChange);
-    
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('themeChanged', handleThemeChange);
-    };
-  }, []);
-  
-  // Use the user's chosen theme (light or dark) regardless of wallpaper
-  // Wallpaper is just a background - user controls the theme
-  const isLight = systemTheme === 'light';
-  
-  // Theme detection working correctly - debug logs removed
+  // Theme detection working correctly - now using centralized ThemeContext and styles
   
   const headerClass = "h-14 px-6 flex items-center justify-end";
   
-  const textClass = isLight ? "text-zinc-900" : "text-white";
-  const subtitleClass = isLight ? "text-zinc-700" : "text-white font-medium";
-  
-  // Button styles - different for wallpaper vs no wallpaper
-  const buttonBaseClass = hasWallpaper
-    ? isLight
-      ? "bg-white border border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900 shadow-lg"
-      : "bg-zinc-800/90 backdrop-blur-md shadow-xl border-2 border-white/30 hover:border-white/50 hover:bg-zinc-700/90 text-white font-semibold"
-    : isLight
-      ? "border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900"
-      : "bg-zinc-900 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-100 hover:text-white";
-  
-  const buttonActiveClass = hasWallpaper
-    ? isLight
-      ? "bg-blue-600 border-blue-600 text-white font-semibold shadow-lg"
-      : "bg-blue-500/40 border-2 border-blue-400 text-white font-bold shadow-xl backdrop-blur-md"
-    : isLight
-      ? "border-blue-500 bg-blue-50 text-blue-700 font-semibold"
-      : "bg-blue-500/20 border-blue-500 text-blue-400 font-semibold";
-  
-  // Panel and card styles
-  const expandedPanelClass = hasWallpaper
-    ? isLight
-      ? "bg-white border border-zinc-200 rounded-xl p-4 shadow-xl"
-      : "bg-zinc-900/95 backdrop-blur-xl border-2 border-white/30 rounded-xl p-4 shadow-2xl"
-    : isLight
-      ? "bg-white border border-zinc-200 rounded-xl p-4 shadow-lg"
-      : "bg-zinc-900/50 border border-zinc-800 rounded-xl p-4";
-  
-  const cardClass = hasWallpaper
-    ? isLight
-      ? "bg-white border border-zinc-200 hover:border-blue-500 hover:shadow-md rounded-lg transition-all group cursor-pointer"
-      : "bg-white/15 backdrop-blur-lg border-2 border-white/40 hover:border-white/70 hover:bg-white/25 rounded-lg transition-all group cursor-pointer shadow-2xl"
-    : isLight
-      ? "bg-white border border-zinc-200 hover:border-blue-500 hover:shadow-md rounded-lg transition-all group cursor-pointer"
-      : "bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/70 rounded-lg transition-all group cursor-pointer";
-  
-  const inputClass = hasWallpaper
-    ? isLight
-      ? "bg-white border border-zinc-300 rounded-3xl shadow-lg hover:shadow-xl transition-shadow"
-      : "bg-zinc-800/95 backdrop-blur-sm border border-zinc-700 rounded-3xl shadow-lg hover:shadow-xl transition-shadow text-white"
-    : isLight
-      ? "bg-white border border-zinc-300 rounded-3xl shadow-sm hover:shadow-md transition-shadow"
-      : "bg-zinc-900 border border-zinc-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow text-white";
+  // Use centralized theme styles for consistency
+  const textClass = getThemeStyle('text', hasWallpaper, isLight, 'primary');
+  const subtitleClass = getThemeStyle('text', hasWallpaper, isLight, 'secondary');
+  const buttonBaseClass = getThemeStyle('button', hasWallpaper, isLight, 'base');
+  const buttonActiveClass = getThemeStyle('button', hasWallpaper, isLight, 'active');
+  const expandedPanelClass = getThemeStyle('panel', hasWallpaper, isLight);
+  const cardClass = getThemeStyle('card', hasWallpaper, isLight);
+  const inputClass = getThemeStyle('input', hasWallpaper, isLight);
   
   const panelTextClass = hasWallpaper
     ? isLight ? "text-zinc-900" : "text-white font-semibold"
-    : isLight ? "text-zinc-900" : "text-zinc-100";
+    : isLight ? "text-zinc-900" : "text-white";
     
   const panelSubtextClass = hasWallpaper
     ? isLight ? "text-zinc-700" : "text-white/90"
@@ -285,7 +183,7 @@ export default function HomeContent({
     
   const iconHoverClass = hasWallpaper
     ? isLight ? "text-zinc-600 group-hover:text-blue-600" : "text-white/90 group-hover:text-white"
-    : isLight ? "text-zinc-600 group-hover:text-blue-600" : "text-zinc-400 group-hover:text-zinc-200";
+    : isLight ? "text-zinc-600 group-hover:text-blue-600" : "text-zinc-500 group-hover:text-zinc-300";
 
   return (
     <div className="flex-1 flex flex-col">
@@ -299,21 +197,13 @@ export default function HomeContent({
               onChange={onModelChange}
               options={getModelsWithStatus(modelOptions)}
               placeholder="Select a model"
-              isDark={!isLight}
+              {...getSelectClass()}
               onSelectUnconfigured={handleUnconfiguredModel}
             />
           </div>
           <button
             onClick={() => onOpenSettings && onOpenSettings()}
-            className={`p-2 rounded-lg transition-colors ${
-              hasWallpaper
-                ? isLight
-                  ? "bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900 shadow-lg"
-                  : "bg-zinc-900/90 backdrop-blur-md border border-white/30 hover:bg-zinc-800/90 text-zinc-100 hover:text-white shadow-lg"
-                : isLight
-                  ? "bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900"
-                  : "bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-100 hover:text-white"
-            }`}
+            className={`p-2 rounded-lg transition-colors ${getHeaderButtonClass()}`}
             title="Settings"
           >
             <Settings02Icon size={18} strokeWidth={2} />
@@ -328,7 +218,7 @@ export default function HomeContent({
           <div className="text-center mb-8">
             <div className="flex justify-center mb-3">{greetingIcon}</div>
             <h1 className={`text-4xl font-bold mb-2 drop-shadow-lg ${textClass}`}>
-              {greeting}, {userName}
+              {greeting}
             </h1>
             <p className={`text-lg drop-shadow-md ${subtitleClass}`}>What would you like to work on today?</p>
           </div>
@@ -571,7 +461,7 @@ export default function HomeContent({
                   return (
                     <div
                       key={chat.id}
-                      className="p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors cursor-pointer relative group"
+                      className={`p-4 ${cardClass}`}
                       onClick={() => handleProjectSelect(chat.id, 'chat')}
                     >
                       <div className="mb-2 flex items-center gap-1.5">

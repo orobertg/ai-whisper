@@ -24,6 +24,7 @@ import ChatPanel from "./ChatPanel";
 import { Node, Edge } from "reactflow";
 import { Template } from "@/lib/templates";
 import { ProgressMetrics } from "@/lib/progress";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type Folder = {
   id: number;
@@ -100,6 +101,7 @@ export default function Sidebar({
   selectedModel = "Ollama - Llama 3.2",
   onModelChange
 }: SidebarProps) {
+  const { isLight } = useTheme();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(false);
   const [foldersExpanded, setFoldersExpanded] = useState(true);
@@ -232,17 +234,31 @@ export default function Sidebar({
 
   return (
     <aside 
-      className={`h-screen bg-zinc-900/50 border-r border-zinc-800 flex flex-col transition-all duration-300 ${
+      className={`h-screen ${
+        isLight ? 'bg-white border-zinc-200' : 'bg-zinc-900/50 border-zinc-800'
+      } border-r flex flex-col transition-all duration-300 ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
       {/* Logo */}
-      <div className={`border-b border-zinc-800 flex-shrink-0 ${isCollapsed ? 'px-2 py-3' : 'px-4 py-3'}`}>
+      <div className={`border-b ${isLight ? 'border-zinc-200' : 'border-zinc-800'} flex-shrink-0 ${isCollapsed ? 'px-2 py-3' : 'px-4 py-3'}`}>
         <div className={`flex items-center mb-3 ${isCollapsed ? 'flex-col gap-2' : 'gap-3'}`}>
-          <div className="w-9 h-9 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-            <AiNetworkIcon size={20} className="text-white" strokeWidth={2.5} />
+          <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
+            <img 
+              src={isLight ? "/logo-dark.svg" : "/logo-light.svg"}
+              alt="AI Whisper Logo" 
+              className="w-9 h-9 object-contain"
+            />
           </div>
-          {!isCollapsed && <h1 className="text-base font-semibold text-white flex-1">AI Whisper</h1>}
+          {!isCollapsed && (
+            <h1 className={`text-base font-semibold flex-1 ${
+              isLight 
+                ? 'bg-gradient-to-r from-zinc-700 to-zinc-900 bg-clip-text text-transparent' 
+                : 'bg-gradient-to-r from-zinc-100 to-zinc-300 bg-clip-text text-transparent'
+            }`}>
+              AI Whisper
+            </h1>
+          )}
           {/* Collapse Toggle Button */}
           <button
             onClick={toggleCollapse}

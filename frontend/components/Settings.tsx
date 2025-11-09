@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Settings02Icon, AiNetworkIcon, CheckmarkCircle02Icon } from "@hugeicons/react";
 import ProviderSettings from "./ProviderSettings";
 import { analyzeImageBrightness } from "@/lib/imageAnalyzer";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type Theme = "light" | "dark" | "system";
 
@@ -25,6 +26,7 @@ type SettingsProps = {
 };
 
 export default function Settings({ isOpen, onClose, initialTab, initialProvider }: SettingsProps) {
+  const { setTheme: setGlobalTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab || "appearance");
   const [theme, setTheme] = useState<Theme>("system");
   const [customBackground, setCustomBackground] = useState(false);
@@ -49,7 +51,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
 
   // Load settings from localStorage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme;
+    const savedTheme = localStorage.getItem("systemTheme") as Theme;
     const savedBackground = localStorage.getItem("customBackground") === "true";
     const savedChatColor = localStorage.getItem("chatColor") === "true";
     const savedWallpapers = localStorage.getItem("chatWallpapers");
@@ -59,8 +61,18 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
     if (savedTheme) {
       setTheme(savedTheme);
       applyTheme(savedTheme);
+      
+      // Sync with ThemeContext
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        setGlobalTheme(savedTheme);
+      } else if (savedTheme === 'system') {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        setGlobalTheme(prefersDark ? 'dark' : 'light');
+      }
     } else {
       applyTheme("system");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setGlobalTheme(prefersDark ? 'dark' : 'light');
     }
     
     setCustomBackground(savedBackground);
@@ -79,7 +91,7 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
     if (savedBlur) {
       setWallpaperBlur(Number(savedBlur));
     }
-  }, []);
+  }, [setGlobalTheme]);
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
@@ -99,13 +111,31 @@ export default function Settings({ isOpen, onClose, initialTab, initialProvider 
     applyTheme(newTheme); // Apply immediately for preview
     setHasChanges(true);
     
+    // Update global theme context for light/dark (system theme will be handled by applyTheme)
+    if (newTheme === 'light' || newTheme === 'dark') {
+      setGlobalTheme(newTheme);
+    } else if (newTheme === 'system') {
+      // For system theme, detect preference and set accordingly
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setGlobalTheme(prefersDark ? 'dark' : 'light');
+    }
+    
     // Dispatch event to notify other components of theme change
-    window.dispatchEvent(new Event('themeChanged'));
+    window.dispatchEvent(new CustomEvent('themeChanged'));
   };
 
   const handleSaveChanges = () => {
     if (activeTab === "appearance") {
-    localStorage.setItem("theme", theme);
+    localStorage.setItem("systemTheme", theme);
+    
+    // Also update the ThemeContext with the resolved theme (light or dark)
+    if (theme === 'light' || theme === 'dark') {
+      setGlobalTheme(theme);
+    } else if (theme === 'system') {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setGlobalTheme(prefersDark ? 'dark' : 'light');
+    }
+    
     localStorage.setItem("customBackground", String(customBackground));
     localStorage.setItem("chatColor", String(chatColor));
       localStorage.setItem("chatWallpapers", JSON.stringify(wallpapers));

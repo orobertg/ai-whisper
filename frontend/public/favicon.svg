@@ -1,18 +1,34 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Simple AI network logo - monochromatic -->
-  <rect width="32" height="32" rx="6" fill="#18181B"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- AI Whisper Brain/Neural Network Icon - Favicon (Dark Background) -->
+  <rect width="1024" height="1024" fill="#18181b"/>
   
-  <!-- Network nodes -->
-  <circle cx="16" cy="16" r="3" fill="#FFFFFF" opacity="0.9"/>
-  <circle cx="10" cy="10" r="2" fill="#FFFFFF" opacity="0.7"/>
-  <circle cx="22" cy="10" r="2" fill="#FFFFFF" opacity="0.7"/>
-  <circle cx="10" cy="22" r="2" fill="#FFFFFF" opacity="0.7"/>
-  <circle cx="22" cy="22" r="2" fill="#FFFFFF" opacity="0.7"/>
-  
-  <!-- Connecting lines -->
-  <line x1="16" y1="16" x2="10" y2="10" stroke="#FFFFFF" stroke-width="1.5" opacity="0.4"/>
-  <line x1="16" y1="16" x2="22" y2="10" stroke="#FFFFFF" stroke-width="1.5" opacity="0.4"/>
-  <line x1="16" y1="16" x2="10" y2="22" stroke="#FFFFFF" stroke-width="1.5" opacity="0.4"/>
-  <line x1="16" y1="16" x2="22" y2="22" stroke="#FFFFFF" stroke-width="1.5" opacity="0.4"/>
+  <g transform="translate(512, 512)">
+    <!-- Head/Top Section -->
+    <circle cx="-80" cy="-200" r="32" fill="#fafafa"/>
+    <circle cx="80" cy="-200" r="32" fill="#fafafa"/>
+    <path d="M -80 -200 Q 0 -260 80 -200" stroke="#fafafa" stroke-width="24" fill="none" stroke-linecap="round"/>
+    
+    <!-- Center Body -->
+    <ellipse cx="0" cy="-100" rx="60" ry="140" fill="#fafafa"/>
+    
+    <!-- Left Wing -->
+    <path d="M -60 -120 Q -200 -80 -240 0 Q -200 80 -60 120 Z" fill="none" stroke="#fafafa" stroke-width="28"/>
+    <circle cx="-140" cy="-60" r="20" fill="#fafafa"/>
+    <circle cx="-180" cy="0" r="20" fill="#fafafa"/>
+    <circle cx="-140" cy="60" r="20" fill="#fafafa"/>
+    <line x1="-140" y1="-60" x2="-180" y2="0" stroke="#fafafa" stroke-width="12"/>
+    <line x1="-180" y1="0" x2="-140" y2="60" stroke="#fafafa" stroke-width="12"/>
+    
+    <!-- Right Wing -->
+    <path d="M 60 -120 Q 200 -80 240 0 Q 200 80 60 120 Z" fill="none" stroke="#fafafa" stroke-width="28"/>
+    <circle cx="140" cy="-40" r="18" fill="#fafafa"/>
+    <circle cx="180" cy="0" r="18" fill="#fafafa"/>
+    <circle cx="140" cy="40" r="18" fill="#fafafa"/>
+    <path d="M 140 -40 L 180 0 L 140 40" stroke="#fafafa" stroke-width="12" fill="none"/>
+    
+    <!-- Connection dots -->
+    <circle cx="0" cy="-50" r="16" fill="#fafafa"/>
+    <circle cx="0" cy="50" r="16" fill="#fafafa"/>
+  </g>
 </svg>
-

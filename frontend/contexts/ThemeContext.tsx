@@ -16,18 +16,25 @@ interface ThemeContextType {
   theme: ThemeMode;
   setTheme: (theme: ThemeMode) => void;
   isLight: boolean;
+  isDark: boolean;
   
   // Wallpaper
   wallpaper: Wallpaper | null;
   setWallpaper: (wallpaper: Wallpaper | null) => void;
   hasWallpaper: boolean;
   
-  // Helper functions for consistent styling
+  // Core UI helpers
   getCardClass: () => string;
   getInputClass: () => string;
-  getButtonClass: (variant?: 'primary' | 'secondary') => string;
+  getButtonClass: (variant?: 'primary' | 'secondary' | 'ghost') => string;
   getTextClass: (variant?: 'primary' | 'secondary' | 'muted') => string;
   getBadgeClass: (color: 'red' | 'orange' | 'green' | 'blue' | 'purple') => string;
+  
+  // Header/Navigation helpers
+  getHeaderButtonClass: () => string;
+  getSelectClass: () => { isDark: boolean };
+  getSidebarClass: () => string;
+  getBorderClass: () => string;
   
   // Kanban-specific helpers
   getKanbanColumnClass: () => string;
@@ -38,12 +45,17 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  // Track if component is mounted (client-side) to avoid hydration mismatches
+  const [mounted, setMounted] = useState(false);
+  
   // Initialize theme from localStorage immediately (client-side only)
+  // Default to 'light' for SSR to match expected initial render
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('systemTheme') as ThemeMode) || 'dark';
+      const savedTheme = (localStorage.getItem('systemTheme') as ThemeMode) || 'light';
+      return savedTheme;
     }
-    return 'dark';
+    return 'light'; // SSR default
   });
   
   // Initialize wallpaper from localStorage immediately (client-side only)
@@ -66,10 +78,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return null;
   });
   
+  // Set mounted state after hydration
+  useEffect(() => {
+    setMounted(true);
+    
+    // Re-sync theme from localStorage after mount to ensure consistency
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('systemTheme') as ThemeMode;
+      if (savedTheme && savedTheme !== theme) {
+        setThemeState(savedTheme);
+      }
+    }
+  }, []);
+  
   // Listen for theme/wallpaper changes
   useEffect(() => {
     const handleThemeChange = () => {
-      const newTheme = localStorage.getItem('systemTheme') as ThemeMode || 'dark';
+      const newTheme = localStorage.getItem('systemTheme') as ThemeMode || 'light';
       setThemeState(newTheme);
     };
     
@@ -118,6 +143,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
   
   const isLight = theme === 'light';
+  const isDark = theme === 'dark';
   const hasWallpaper = !!wallpaper;
   
   // Helper functions for consistent styling
@@ -143,10 +169,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       : 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600';
   };
   
-  const getButtonClass = (variant: 'primary' | 'secondary' = 'primary') => {
+  const getButtonClass = (variant: 'primary' | 'secondary' | 'ghost' = 'primary') => {
     if (variant === 'primary') {
       return 'bg-blue-500 hover:bg-blue-600 text-white border-blue-600';
     }
+    if (variant === 'ghost') {
+      return isLight
+        ? 'text-zinc-700 hover:bg-zinc-100'
+        : 'text-zinc-300 hover:bg-zinc-800';
+    }
+    // secondary
     if (hasWallpaper) {
       return isLight
         ? 'bg-white/95 backdrop-blur-sm border-zinc-200 text-zinc-700 hover:bg-zinc-50 shadow-lg'
@@ -194,6 +226,27 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return colors[color][isLight ? 'light' : 'dark'];
   };
   
+  // Header/Navigation helpers - for consistent header elements across all screens
+  const getHeaderButtonClass = () => {
+    return isLight
+      ? 'bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900'
+      : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-zinc-300 hover:text-white';
+  };
+  
+  const getSelectClass = () => {
+    return { isDark: !isLight };
+  };
+  
+  const getSidebarClass = () => {
+    return isLight
+      ? 'bg-white border-zinc-200'
+      : 'bg-zinc-900/50 border-zinc-800';
+  };
+  
+  const getBorderClass = () => {
+    return isLight ? 'border-zinc-200' : 'border-zinc-800';
+  };
+  
   // Kanban-specific helpers
   const getKanbanColumnClass = () => {
     if (hasWallpaper) {
@@ -223,6 +276,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         theme,
         setTheme,
         isLight,
+        isDark,
         wallpaper,
         setWallpaper,
         hasWallpaper,
@@ -231,6 +285,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         getButtonClass,
         getTextClass,
         getBadgeClass,
+        getHeaderButtonClass,
+        getSelectClass,
+        getSidebarClass,
+        getBorderClass,
         getKanbanColumnClass,
         getKanbanCardClass,
         getPriorityBadgeClass,

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- AI Whisper Brain/Neural Network Icon - Dark Version (for Light Theme) -->
+  <g transform="translate(512, 512)">
+    <!-- Head/Top Section -->
+    <circle cx="-80" cy="-200" r="32" fill="#27272a"/>
+    <circle cx="80" cy="-200" r="32" fill="#27272a"/>
+    <path d="M -80 -200 Q 0 -260 80 -200" stroke="#27272a" stroke-width="24" fill="none" stroke-linecap="round"/>
+    
+    <!-- Center Body -->
+    <ellipse cx="0" cy="-100" rx="60" ry="140" fill="#27272a"/>
+    
+    <!-- Left Wing - Neural Network Pattern -->
+    <path d="M -60 -120 Q -200 -80 -240 0 Q -200 80 -60 120 Z" fill="none" stroke="#3f3f46" stroke-width="28" stroke-linejoin="round"/>
+    <!-- Left wing nodes -->
+    <circle cx="-140" cy="-60" r="20" fill="#3f3f46"/>
+    <circle cx="-180" cy="0" r="20" fill="#3f3f46"/>
+    <circle cx="-140" cy="60" r="20" fill="#3f3f46"/>
+    <!-- Left wing connections -->
+    <line x1="-140" y1="-60" x2="-180" y2="0" stroke="#52525b" stroke-width="12"/>
+    <line x1="-180" y1="0" x2="-140" y2="60" stroke="#52525b" stroke-width="12"/>
+    <line x1="-140" y1="-60" x2="-140" y2="60" stroke="#52525b" stroke-width="10" opacity="0.5"/>
+    
+    <!-- Right Wing - Circuit Pattern -->
+    <path d="M 60 -120 Q 200 -80 240 0 Q 200 80 60 120 Z" fill="none" stroke="#3f3f46" stroke-width="28" stroke-linejoin="round"/>
+    <!-- Right wing circuit -->
+    <circle cx="140" cy="-40" r="18" fill="#3f3f46"/>
+    <circle cx="180" cy="0" r="18" fill="#3f3f46"/>
+    <circle cx="140" cy="40" r="18" fill="#3f3f46"/>
+    <!-- Right wing circuit connections -->
+    <path d="M 140 -40 L 180 0 L 140 40" stroke="#52525b" stroke-width="12" fill="none"/>
+    <line x1="140" y1="-40" x2="140" y2="40" stroke="#52525b" stroke-width="10" opacity="0.5"/>
+    
+    <!-- Connection dots to body -->
+    <circle cx="0" cy="-50" r="16" fill="#27272a"/>
+    <circle cx="0" cy="50" r="16" fill="#27272a"/>
+  </g>
+</svg>
+

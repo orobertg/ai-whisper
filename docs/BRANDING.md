@@ -1,110 +1,143 @@
-# AI Whisper - Branding Guide
+# AI Whisper Branding Guide
 
-## Name
-**AI Whisper**
+## Logo
 
-## Tagline
-"Mind mapping for solo developers"
+### Primary Logo
+The AI Whisper logo is a distinctive brain/neural network design representing AI-powered thinking and intelligence.
 
-## Description (Short)
-Transform visual planning into AI-generated specifications.
+**Files:**
+- `frontend/public/logo.svg` - Full logo (1024x1024)
+- `frontend/public/favicon.svg` - Favicon version (32x32)
 
-## Description (Long)
-AI Whisper guides solo developers through structured project planning with templates, node-based mind mapping, and AI-powered specification generation. Self-hostable for privacy and control.
+### Logo Usage
 
-## Key Value Propositions
-1. **Template-based planning** - Pre-built templates for SaaS, API, Mobile App, or custom projects
-2. **Node-based mind mapping** - Structured approach with Feature, Technical, User Story, Data Model nodes
-3. **AI-guided workflow** - Smart questions to help complete specifications
-4. **YAML spec generation** - Export structured, production-ready documentation
-5. **Self-hostable** - Your data stays on your infrastructure
+#### Sidebar Logo
+The logo appears in the sidebar with the text "AI Whisper" beside it:
+- Size: 36x36 pixels (w-9 h-9)
+- Background: Transparent or subtle background
+- Text: "AI Whisper" in semibold white text
 
-## Visual Identity
+#### Favicon
+Used in browser tabs and bookmarks:
+- Size: 32x32 pixels
+- Format: SVG
+- Scales cleanly across devices
 
-### Colors
-- Primary: Purple (`#9333ea` / `purple-600`)
-- Feature Nodes: Blue (`#3b82f6`)
-- Technical Nodes: Green (`#22c55e`)
-- User Story Nodes: Yellow (`#eab308`)
-- Data Model Nodes: Purple (`#a855f7`)
-- Notes Nodes: Gray (`#6b7280`)
+### Color Palette
 
-### Icons
-- App Icon: 🎯 (Target) - Represents focus and goal-oriented planning
-- Template Selector: Various emojis per template
-  - SaaS: 🚀 (Rocket)
-  - API: ⚡ (Lightning)
-  - Mobile: 📱 (Phone)
-  - Blank: 📄 (Document)
+#### Background Colors
+- **Light Cream**: `#FDFAF6` - Main background of logo
+- **Dark Gray**: `#243133` - Primary iconography color
+- **Medium Gray**: `#232F31` - Secondary details
+
+#### Application Colors (Theme)
+- **Dark Mode Background**: `#18181b` (zinc-900)
+- **Dark Mode Surface**: `#27272a` (zinc-800)
+- **Dark Mode Border**: `#3f3f46` (zinc-700)
+- **Light Mode Background**: `#fafafa` (zinc-50)
+- **Light Mode Surface**: `#ffffff` (white)
+- **Accent Color**: `#3b82f6` (blue-500)
 
 ### Typography
-- System font stack via Tailwind CSS defaults
-- Monospace for code/technical content
 
-## Voice & Tone
-- **Helpful and guiding** - Like a knowledgeable colleague
-- **Technical but approachable** - For developers, not overly formal
-- **Concise** - Respect users' time
-- **Encouraging** - Support users in their planning journey
+#### Primary Font
+- **Font Family**: System UI stack
+- **Headings**: Semibold (600)
+- **Body**: Regular (400)
+- **Monospace**: For code blocks
 
-## Positioning Statements
+#### Font Sizes
+- **App Title**: 16px (text-base)
+- **Headings**: 20-32px
+- **Body**: 14px (text-sm)
+- **Small**: 12px (text-xs)
 
-### Primary
-"AI Whisper is mind mapping for solo developers who need structured guidance to plan their projects and generate specifications."
+### Brand Voice
 
-### Competitive Differentiators
-- **vs. Notion AI**: Template-driven, visual mind mapping specifically for technical projects
-- **vs. Miro**: Purpose-built for solo developers, AI-guided, specification output
-- **vs. ChatGPT**: Structured workflow with templates, persistent visual planning
-- **vs. v0/Bolt**: Planning layer before code generation, self-hostable
+**AI Whisper** embodies:
+- **Intelligence**: AI-powered mind-mapping
+- **Clarity**: Simple, intuitive interactions
+- **Collaboration**: Human + AI working together
+- **Creativity**: Visual thinking and exploration
+- **Precision**: Spec-driven development methodology
 
-## Use Cases
+### Tone & Messaging
 
-### Primary
-Solo developer planning a new side project or MVP
+- **Professional yet Approachable**: Technical but friendly
+- **Empowering**: "Your AI thinking partner"
+- **Confident**: "Specification-driven, AI-powered"
+- **Transparent**: Clear about AI capabilities and limitations
 
-### Secondary
-- Freelancer scoping client projects
-- Technical lead outlining system architecture
-- Indie hacker documenting product specs
-- Student planning capstone project
+### Visual Style
 
-## Feature Naming Conventions
+#### Design Principles
+1. **Clean & Minimal**: Remove unnecessary elements
+2. **Consistent**: Unified theme system throughout
+3. **Accessible**: High contrast, readable fonts
+4. **Responsive**: Works seamlessly on all screen sizes
+5. **Delightful**: Smooth animations, glass-morphism effects
 
-### Templates
-Named after project types: "SaaS Application", "API Service", "Mobile App"
+#### UI Elements
+- **Buttons**: Rounded (rounded-lg), solid/outline variants
+- **Cards**: Glass-morphism when wallpaper enabled
+- **Icons**: Hugeicons Pro, 2px stroke weight
+- **Shadows**: Subtle, layered depth
 
-### Node Types
-Action-oriented or role-based:
-- Feature (what to build)
-- Technical Requirement (how to build)
-- User Story (who/why)
-- Data Model (data structure)
-- Notes (context)
+### Application in Interface
 
-### UI Elements
-- "Mind Map" (not canvas, not board)
-- "Template Selector" (not wizard, not setup)
-- "Generate with AI" (action button)
-- "Nodes" and "Connections" (not shapes and lines)
+#### Sidebar
+- Logo displayed at top with app name
+- Consistent brand colors in dark mode
+- Professional, organized layout
 
-## Messaging Examples
+#### Home Screen
+- Large centered logo on first load
+- Welcoming message with AI Whisper branding
+- Template cards showcase product capabilities
 
-### Hero Message
-"Transform your ideas into specifications with AI-guided mind mapping"
-
-### Call to Action
-- Primary: "Choose Template"
-- Secondary: "Generate with AI"
-- Tertiary: "Start from Blank"
-
-### Feature Descriptions
-- Templates: "Start with proven structures for SaaS, APIs, and mobile apps"
-- Mind Mapping: "Visual planning with purpose-built nodes for features, requirements, and user stories"
-- AI Guidance: "Answer smart questions to complete your specifications"
-- Export: "Generate production-ready YAML documentation"
+#### Chat Interface
+- AI Whisper logo in message avatars
+- Consistent color scheme for AI responses
+- Visual distinction between user and AI
 
 ---
 
-*Brand established: October 2025*
+## Logo Evolution
 
+### Version 1.0 (Current)
+- **Date**: November 2025
+- **Description**: Brain/neural network iconography with warm cream background and dark gray details
+- **Purpose**: Represents AI-powered thinking, mind-mapping, and intelligent collaboration
+
+### Future Considerations
+- Animated logo for loading states
+- Logo variations for different contexts (social media, documentation, merchandise)
+- Dark mode optimized version with adjusted colors
+
+---
+
+## Brand Guidelines
+
+### Do's
+✅ Use the logo in its original proportions  
+✅ Ensure sufficient whitespace around logo  
+✅ Use approved color palette  
+✅ Maintain consistent typography  
+✅ Follow theme system guidelines  
+
+### Don'ts
+❌ Distort or skew the logo  
+❌ Change logo colors arbitrarily  
+❌ Use low-resolution versions  
+❌ Add effects (shadows, glows) to logo  
+❌ Place logo on busy backgrounds  
+
+---
+
+## Contact & Usage
+
+For brand asset requests or usage questions, refer to the main repository documentation.
+
+**Last Updated**: November 2025  
+**Version**: 1.0  
+**Status**: Active
